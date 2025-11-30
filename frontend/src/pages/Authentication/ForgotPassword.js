@@ -1,16 +1,20 @@
 import React, { useState } from 'react';
 import logo from '../../images/logo.png';
-import './Login.css'; // Reusing Login.css for unified design
 import { useNavigate } from 'react-router-dom';
+import { FaInfoCircle, FaEnvelope, FaArrowLeft, FaKey, FaPaperPlane } from 'react-icons/fa';
 import './ForgotPassword.css';
+
 const BASE_URL = process.env.REACT_APP_API_BASE_URL;
 
 function ForgotPassword() {
   const [userID, setUserID] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setIsLoading(true);
+
     try {
       const res = await fetch(`${BASE_URL}/auth/forgot-pass`, {
         method: 'POST',
@@ -28,35 +32,120 @@ function ForgotPassword() {
     } catch (error) {
       console.error('Error:', error);
       alert('Something went wrong. Please try again later.');
+    } finally {
+      setIsLoading(false);
     }
   };
 
   return (
-    <div className="pr fade-in">
-      <div className="top">
-        <img className="logo1" src={logo} alt="logo" />
-        <h1>Walchand College of Engineering, Sangli</h1>
-        <h2>Department Of Electronics Engineering</h2>
-        <h3>Project Management Tool</h3>
+    <div className="forgot-password-container">
+      <div className="forgot-password-card">
+        {/* Left Section */}
+        <div className="left-section">
+          {/* College Logo */}
+          <div className="logo-container">
+            <img src={logo} alt="Walchand College Logo" className="college-logo" />
+          </div>
+
+          {/* College Name */}
+          <h1 className="college-name">
+            Walchand College of<br />Engineering, Sangli
+          </h1>
+
+          <div className="department-info">
+            <p className="department-name">Department of Electronics Engineering</p>
+            <p className="tool-name">Project Management Tool</p>
+          </div>
+
+          {/* Info Icon */}
+          <div className="info-icon-container">
+            <FaInfoCircle className="info-icon" size={80} color="#8B2E2E" />
+            <p className="info-text">Enter your User ID to receive password reset instructions</p>
+          </div>
+
+          {/* Contact Info */}
+          <div className="contact-info">
+            <p className="contact-title">Need Help?</p>
+            <div className="email-container">
+              <FaEnvelope size={16} color="#666" />
+              <span className="email-text">support@walchandsangli.ac.in</span>
+            </div>
+          </div>
+
+          {/* Decorative Element */}
+          <div className="decorative-stripe"></div>
+        </div>
+
+        {/* Right Section - Reset Form */}
+        <div className="right-section">
+          {/* Back Button */}
+          <button
+            className="back-button"
+            onClick={() => navigate('/')}
+            type="button"
+          >
+            <FaArrowLeft size={16} />
+            Back to Login
+          </button>
+
+          <div className="reset-icon">
+            <FaKey size={60} color="#8B2E2E" />
+          </div>
+
+          <h2 className="form-title">Forgot Password?</h2>
+          <p className="form-subtitle">
+            Don't worry! Enter your User ID and we'll send you instructions to reset your password.
+          </p>
+
+          <form onSubmit={handleSubmit} className="reset-form">
+            {/* User ID Field */}
+            <div className="input-group">
+              <label className="input-label">User ID</label>
+              <input
+                type="text"
+                value={userID}
+                onChange={(e) => setUserID(e.target.value)}
+                className="form-input"
+                placeholder="Enter your User ID"
+                required
+              />
+            </div>
+
+            {/* Submit Button */}
+            <button
+              type="submit"
+              className="submit-button"
+              disabled={isLoading}
+            >
+              {isLoading ? (
+                <>
+                  <span className="spinner"></span>
+                  Sending...
+                </>
+              ) : (
+                <>
+                  <FaPaperPlane size={18} />
+                  Request Reset Link
+                </>
+              )}
+            </button>
+
+            {/* Help Text */}
+            <div className="help-text">
+              <FaInfoCircle size={16} color="#666" style={{ flexShrink: 0, marginTop: '2px' }} />
+              <span>
+                If you don't receive an email within 5 minutes, please check your spam folder or contact support.
+              </span>
+            </div>
+          </form>
+
+          {/* Copyright */}
+          <footer className="forgot-footer">
+            © 2025 Walchand College of Engineering, Sangli. All rights reserved.<br />
+            Designed, Developed & Implemented by <strong>Pushkar Nashikkar</strong>
+          </footer>
+        </div>
       </div>
-      <form className="form" onSubmit={handleSubmit}>
-        <div className="abc">
-          <label>User ID:</label>
-          <input
-            type="text"
-            value={userID}
-            onChange={(e) => setUserID(e.target.value)}
-            required
-          />
-        </div>
-        <input type="submit" value="Request Reset Link" />
-        <div className="forgot-password" style={{ marginTop: '15px' }}>
-          <a href="/">Back to Login</a>
-        </div>
-      </form>
-      <footer className="footer">
-        © 2025 Walchand College of Engineering, Sangli. All rights reserved.
-      </footer>
     </div>
   );
 }

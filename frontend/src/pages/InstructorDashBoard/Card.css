@@ -1,192 +1,127 @@
+/* Card container */
 .card {
   background: #fff;
-  border-radius: 15px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-
-  width: 95%; /* increased from min-width/max-width to full width */
-  box-sizing: border-box;
-  transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
-  will-change: transform;
-  transform-origin: center center;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
+  border-radius: 12px;
+  padding: 20px;
+  margin: 20px auto;
+  max-width: 700px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
+.card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.12);
+}
 
-/* Header */
+/* Headings */
 .card h2 {
-  margin: 0 0 10px;
-  color: #2c3e50;
-  font-size: 1.4rem;
+  margin-bottom: 10px;
+  font-size: 1.6rem;
+  color: #333;
 }
 
-/* Paragraphs */
-.card p {
-  margin: 5px 0;
-  color: #555;
-  line-height: 1.4;
-}
-
-/* Label text */
+/* Labels */
 .label {
-  font-weight: bold;
+  font-weight: 600;
   color: #444;
+}
+
+/* General text */
+.card p {
+  margin: 8px 0;
+  font-size: 0.95rem;
+  color: #555;
 }
 
 /* Links */
 .link-text {
-  color: #2980b9;
+  color: #007bff;
   text-decoration: none;
   font-weight: 500;
+  transition: color 0.2s ease;
 }
 
 .link-text:hover {
+  color: #0056b3;
   text-decoration: underline;
 }
 
-/* Footer */
-.fter {
-  margin-top: 20px;
-  font-size: 0.9em;
-  color: #888;
-  text-align: right;
-}
-
-/* Button container */
-.card-buttons {
-  margin-top: 20px;
-  display: flex;
-  justify-content: flex-end;
-  gap: 10px;
-}
-
-/* Button base style */
-.approve-btn,
-.deny-btn {
-  padding: 0.5rem 1.2rem;
-  font-weight: bold;
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
-  font-size: 0.95rem;
-  transition: background-color 0.3s ease, transform 0.2s ease;
-}
-
-/* Approve button */
-.approve-btn {
-  background-color: #4caf50;
-  color: white;
-}
-
-.approve-btn:hover {
-  background-color: #45a049;
-  transform: scale(1.05);
-}
-
-/* Deny button */
-.deny-btn {
-  background-color: #f44336;
-  color: white;
-}
-
-.deny-btn:hover {
-  background-color: #d32f2f;
-  transform: scale(1.05);
-}
-
-/* Footer container (row layout for date + buttons) */
-.card-footer {
-  margin-top: 20px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  flex-wrap: wrap; /* Optional: wrap on small screens */
-}
-
-.fter {
-  font-size: 0.9em;
-  color: #888;
-}
-
-/* Buttons stay same */
-.card-buttons {
-  display: flex;
-  gap: 10px;
-}
-
-/* Table styles */
+/* Table */
 .component-table {
   width: 100%;
   border-collapse: collapse;
-  margin-top: 10px;
+  margin-top: 12px;
+  font-size: 0.9rem;
 }
 
 .component-table th,
 .component-table td {
-  border: 1px solid #ccc;
-  /* padding: 10px 15px; */
+  border: 1px solid #ddd;
+  padding: 8px 12px;
   text-align: left;
-  /* min-width: 120px; 👈 increase this value as needed */
-  /* width: 10px; */
-  min-width: 5rem;
 }
 
 .component-table th {
-  background-color: #f0f0f0;
-  font-weight: bold;
-}
-
-.status-tracker {
-  display: flex;
-  align-items: flex-start;
-  flex-wrap: nowrap;
-  overflow-x: auto;
-  padding: 20px 0;
-  position: relative;
-  margin-top: 15px;
-}
-
-.status-step {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  flex-shrink: 0;
-  width: 160px;
-  position: relative;
-  text-align: center;
-}
-
-.status-dot {
-  width: 16px;
-  height: 16px;
-  background-color: #bbb;
-  border-radius: 50%;
-  z-index: 1;
-  transition: background-color 0.3s;
-}
-
-.status-line {
-  position: absolute;
-  top: 8px;
-  left: 100%;
-  width: 100%;
-  height: 2px;
-  background-color: #ccc;
-  z-index: 0;
-}
-
-.status-step.completed .status-dot {
-  background-color: #4caf50;
-}
-
-.status-step.completed .status-line {
-  background-color: #4caf50;
-}
-
-.status-label {
-  margin-top: 10px;
-  font-size: 0.75rem;
+  background: #f8f9fa;
+  font-weight: 600;
   color: #333;
-  font-weight: 500;
+}
+
+.component-table tr:nth-child(even) {
+  background: #fdfdfd;
+}
+
+.component-table tr:hover {
+  background: #f1f7ff;
+}
+
+/* Footer */
+.card-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 16px;
+  padding-top: 12px;
+  border-top: 1px solid #eee;
+  font-size: 0.85rem;
+  color: #666;
+}
+
+/* Buttons */
+.card-buttons {
+  display: flex;
+  gap: 10px;
+}
+
+.approve-btn,
+.deny-btn {
+  padding: 8px 16px;
+  border: none;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: background 0.2s ease, transform 0.2s ease;
+}
+
+/* Approve */
+.approve-btn {
+  background: #28a745;
+  color: #fff;
+}
+
+.approve-btn:hover {
+  background: #218838;
+  transform: scale(1.05);
+}
+
+/* Deny */
+.deny-btn {
+  background: #dc3545;
+  color: #fff;
+}
+
+.deny-btn:hover {
+  background: #c82333;
+  transform: scale(1.05);
 }

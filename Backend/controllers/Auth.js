@@ -14,15 +14,14 @@ const mailSender = require('../utils/mailSender');
 
 //sendOTP
 exports.sendOTP = async (req, res) => {
-    try{
+    try {
         //fetch email from req body
-        const {email} = req.body;
- 
+        const { email } = req.body;
+
         //check user existence
-        const checkUserPresent = await User.findOne({email});
+        const checkUserPresent = await User.findOne({ email });
         //if user exist then return response
-        if(checkUserPresent)
-        {
+        if (checkUserPresent) {
             return res.status(401).json({
                 success: false,
                 message: "User Already Exists !!"
@@ -37,41 +36,40 @@ exports.sendOTP = async (req, res) => {
         console.log("OTP generated Successfully !!");
 
         //check uniquie OTP 
-        let result = await OTP.findOne({otp:otp});
-        
-        while(result)
-        {
+        let result = await OTP.findOne({ otp: otp });
+
+        while (result) {
             otp = otpGenerator.generate(6, {
                 upperCaseAlphabets: false,
                 lowerCaseAlphabets: false,
                 specialChars: false
             });
-            result = await OTP.findOne({opt:otp});
+            result = await OTP.findOne({ opt: otp });
         }
 
         //Create OTP object !!
-        const otpPayload = {email, otp};
+        const otpPayload = { email, otp };
 
         //create an entry in DB for OTP
         const otpbody = await OTP.create(otpPayload);
         console.log(otpbody);
         res.status(200).json({
-            success:true,
-            message:"OTP Sent Successfully !!"
+            success: true,
+            message: "OTP Sent Successfully !!"
         });
-    }catch(error){
+    } catch (error) {
         console.log("OTP Send nahi ho paya Jii !!");
         res.status(500).json({
-            success:false,
+            success: false,
             message: error.message
         })
-   }
+    }
 }
 
 exports.signUp = async (req, res) => {
     try {
         //fetch Data from req.body
-        const {firstName, lastName, email, password, cPassword, accountType, contactNumber, userID, batch, passingYear, academicYear, otp} = req.body;
+        const { firstName, lastName, email, password, cPassword, accountType, contactNumber, userID, batch, passingYear, academicYear, otp } = req.body;
 
         //Validate Data
         // Always-required fields
@@ -99,18 +97,17 @@ exports.signUp = async (req, res) => {
         }
 
         //Fetch OTP & Validate OTP
-        const recentOTP = await OTP.find({email}).sort({createdAt:-1}).limit(1);
-        if(recentOTP.length == 0)
-        {
+        const recentOTP = await OTP.find({ email }).sort({ createdAt: -1 }).limit(1);
+        if (recentOTP.length == 0) {
             return res.status(400).json({
-                success:false,
-                message:"OTP Not found !"
+                success: false,
+                message: "OTP Not found !"
             });
-        }else if(otp !== recentOTP[0].otp){
+        } else if (otp !== recentOTP[0].otp) {
             console.log(recentOTP, " ", otp);
             return res.status(400).json({
-                success:false,
-                message:"Invalid OTP"
+                success: false,
+                message: "Invalid OTP"
             });
         }
 
@@ -130,7 +127,7 @@ exports.signUp = async (req, res) => {
             userID: Number(userID),
             password: hashedPassword,
             accountType,
-            isVerified:true,
+            isVerified: true,
             contactNumber, // keep as string
             additionalDetail: profile._id,
             image: `https://api.dicebear.com/5.x/initials/svg?seed=${firstName} ${lastName}`,
@@ -217,24 +214,24 @@ exports.login = async (req, res) => {
 };
 
 exports.sendInstructioMail = async (req, res) => {
-  try {
-    const { userID, email } = req.body;
+    try {
+        const { userID, email } = req.body;
 
-    if (!email) {
-      return res.status(400).json({
-        success: false,
-        message: 'Email is required!',
-      });
-    }
+        if (!email) {
+            return res.status(400).json({
+                success: false,
+                message: 'Email is required!',
+            });
+        }
 
-    // Create token valid for 2 minutes
-    const token = jwt.sign({ email, userID }, process.env.JWT_SECRET, { expiresIn: '2m' });
+        // Create token valid for 2 minutes
+        const token = jwt.sign({ email, userID }, process.env.JWT_SECRET, { expiresIn: '2m' });
 
-    // Build frontend reset URL
-    const resetLink = `${process.env.FRONT_BASE}/auth/reset-password?token=${token}`;
+        // Build frontend reset URL
+        const resetLink = `${process.env.FRONT_BASE}/auth/reset-password?token=${token}`;
 
-    const subject = 'Project Pilot - Password Reset Instructions';
-    const body = `
+        const subject = 'Project Pilot - Password Reset Instructions';
+        const body = `
       <p>Hello,</p>
       <p>We received a request to reset your password. Click the link below to proceed:</p>
       <a href="${resetLink}" target="_blank">${resetLink}</a>
@@ -244,20 +241,20 @@ exports.sendInstructioMail = async (req, res) => {
       <p>— Project Pilot Team</p>
     `;
 
-    // Send the mail using your utility
-    await mailSender(email, subject, body);
+        // Send the mail using your utility
+        await mailSender(email, subject, body);
 
-    res.status(200).json({
-      success: true,
-      message: 'Reset instructions sent to your email!',
-    });
-  } catch (error) {
-    console.error('sendInstructioMail error:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Something went wrong while sending reset email.',
-    });
-  }
+        res.status(200).json({
+            success: true,
+            message: 'Reset instructions sent to your email!',
+        });
+    } catch (error) {
+        console.error('sendInstructioMail error:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Something went wrong while sending reset email.',
+        });
+    }
 };
 
 exports.changePassword = async (req, res) => {
@@ -340,38 +337,38 @@ exports.verifyOTP = async (req, res) => {
 };
 
 exports.getCurrentUser = async (req, res) => {
-  try {
-    const userId = req.user?.userId;
+    try {
+        const userId = req.user?.userId;
 
-    if (!userId) {
-      return res.status(401).json({ message: 'Unauthorized: User ID not found in token' });
+        if (!userId) {
+            return res.status(401).json({ message: 'Unauthorized: User ID not found in token' });
+        }
+
+        const user = await User.findById(userId);
+
+        if (!user) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+
+        res.status(200).json({ success: true, data: { ID: user.userID, name: `${user.firstName} ${user.lastName}`, batch: user.batch, passingYear: user.passingYear } });
+    } catch (error) {
+        console.error("getCurrentUser error:", error);
+        res.status(500).json({ message: 'Internal server error' });
     }
-
-    const user = await User.findById(userId);
-
-    if (!user) {
-      return res.status(404).json({ message: 'User not found' });
-    }
-
-    res.status(200).json({ success:true, data:{ID:user.userID, name: `${user.firstName} ${user.lastName}`, batch:user.batch, passingYear:user.passingYear} });
-  } catch (error) {
-    console.error("getCurrentUser error:", error);
-    res.status(500).json({ message: 'Internal server error' });
-  }
 };
 
 exports.verifyToken = (req, res) => {
-  const authHeader = req.headers.authorization;
-  const token = authHeader?.split(' ')[1];
+    const authHeader = req.headers.authorization;
+    const token = authHeader?.split(' ')[1];
 
-  if (!token) {
-    return res.status(401).json({ valid: false, message: 'No token provided' });
-  }
+    if (!token) {
+        return res.status(401).json({ valid: false, message: 'No token provided' });
+    }
 
-  try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    res.status(200).json({ valid: true, user: decoded });
-  } catch (error) {
-    res.status(401).json({ valid: false, message: 'Invalid or expired token' });
-  }
+    try {
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        res.status(200).json({ valid: true, user: decoded });
+    } catch (error) {
+        res.status(401).json({ valid: false, message: 'Invalid or expired token' });
+    }
 };

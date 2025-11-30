@@ -1,10 +1,79 @@
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { FaBars, FaUserCircle, FaSignOutAlt } from 'react-icons/fa';
+import {
+  AppBar,
+  Toolbar,
+  Box,
+  IconButton,
+  Typography,
+  Drawer,
+  List,
+  ListItem,
+  ListItemButton,
+  ListItemText,
+  Divider,
+  Avatar
+} from '@mui/material';
+import {
+  Menu as MenuIcon,
+  Logout as LogoutIcon,
+  Close as CloseIcon
+} from '@mui/icons-material';
+import { styled } from '@mui/material/styles';
 import logo from '../../images/logo.png';
-import './TopBarWithLogo.css';
 
 const BASE_URL = process.env.REACT_APP_API_BASE_URL;
+
+// Styled Components
+const StyledAppBar = styled(AppBar)(({ theme }) => ({
+  backgroundColor: '#1a004b',
+  height: '60px',
+  boxShadow: '0 2px 5px rgba(0, 0, 0, 0.2)',
+}));
+
+const StyledToolbar = styled(Toolbar)({
+  minHeight: '60px',
+  padding: '0 24px',
+  display: 'flex',
+  justifyContent: 'space-between',
+});
+
+const Logo = styled('img')({
+  height: '40px',
+  filter: 'drop-shadow(0 0 10px rgba(255, 255, 255, 0.5))',
+});
+
+const StyledDrawer = styled(Drawer)(({ theme }) => ({
+  '& .MuiDrawer-paper': {
+    width: '250px',
+    top: '0px',
+    height: '100vh',
+    backgroundColor: '#fafafa',
+    boxShadow: '2px 0 5px rgba(0, 0, 0, 0.1)',
+    [theme.breakpoints.down('sm')]: {
+      width: '100%',
+    },
+  },
+}));
+
+const SidebarHeader = styled(Box)(({ theme }) => ({
+  height: '60px',
+  backgroundColor: '#1a004b',
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'space-between',
+  padding: '0 16px',
+  color: 'white',
+}));
+
+const UserSection = styled(Box)({
+  padding: '20px 16px',
+  backgroundColor: '#f0f0f0',
+  borderBottom: '1px solid #ddd',
+  display: 'flex',
+  alignItems: 'center',
+  gap: '12px',
+});
 
 async function getUserData() {
   try {
@@ -30,9 +99,6 @@ async function getUserData() {
 function TopBarWithLogo({ title }) {
   const [userName, setUserName] = useState('');
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [dropdownOpen, setDropdownOpen] = useState(false);
-  const sidebarRef = useRef(null);
-  const dropdownRef = useRef(null);
   const navigate = useNavigate();
 
   const sidebarActions = [
@@ -47,64 +113,189 @@ function TopBarWithLogo({ title }) {
     navigate('/');
   };
 
-  const handleProfile = () => {
-    navigate('/profile');
+  const handleSidebarToggle = () => {
+    setSidebarOpen(!sidebarOpen);
   };
 
-  const handleClickOutside = (e) => {
-    if (sidebarOpen && sidebarRef.current && !sidebarRef.current.contains(e.target)) {
-      setSidebarOpen(false);
-    }
-
-    if (dropdownOpen && dropdownRef.current && !dropdownRef.current.contains(e.target)) {
-      setDropdownOpen(false);
-    }
+  const handleNavigation = (path) => {
+    navigate(path);
+    setSidebarOpen(false);
   };
 
   useEffect(() => {
     async function fetchData() {
       const name = await getUserData();
-      const firstName = name.split(' ')[0];
-      setUserName(firstName);
+      setUserName(name);
     }
     fetchData();
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
   return (
     <>
-      <div className="topbar-with-logo">
-        <div className="logo-title-container">
-          <FaBars className="menu-icon" onClick={() => setSidebarOpen(!sidebarOpen)} />
-          <img src={logo} alt="Logo" className="topbar-logo" />
-          <span className="topbar-title">{title}</span>
-        </div>
-        <div className="user-info1" ref={dropdownRef}>
-          <div className="dropdown1" onClick={() => setDropdownOpen(!dropdownOpen)}>
-            <p className="pnm1">{userName}</p>
-            {dropdownOpen && (
-              <div className="dropdown-content1">
-                {/* <button onClick={handleProfile}>
-                  <FaUserCircle className="icon1" /> Profile
-                </button> */}
-                <button onClick={handleLogout}>
-                  <FaSignOutAlt className="icon1" /> Logout
-                </button>
-              </div>
-            )}
-          </div>
-        </div>
-      </div>
+      <StyledAppBar position="fixed">
+        <StyledToolbar>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+            <IconButton
+              color="inherit"
+              edge="start"
+              onClick={handleSidebarToggle}
+              sx={{ fontSize: '1.5rem' }}
+            >
+              <MenuIcon />
+            </IconButton>
+            <Logo src={logo} alt="Logo" />
+            <Typography
+              variant="h6"
+              sx={{
+                fontWeight: 'bold',
+                fontSize: '1.4rem',
+                '@media (max-width: 768px)': {
+                  fontSize: '1.1rem',
+                },
+              }}
+            >
+              {title}
+            </Typography>
+          </Box>
 
-      <div ref={sidebarRef} className={`sidebar-collapse ${sidebarOpen ? 'open' : ''}`}>
-        {sidebarActions.map((action, index) => (
-          <button key={index} onClick={() => navigate(action.path)}>
-            {action.name}
-          </button>
-        ))}
-      </div>
+          <Typography
+            sx={{
+              fontSize: '1rem',
+              fontWeight: '500',
+              '@media (max-width: 1024px)': {
+                fontSize: '0.9rem',
+              },
+              '@media (max-width: 768px)': {
+                fontSize: '0.75rem',
+              },
+              '@media (max-width: 480px)': {
+                display: 'none',
+              },
+            }}
+          >
+            Department of Electronics Engg. | Project Mgmt. System
+          </Typography>
+        </StyledToolbar>
+      </StyledAppBar>
+
+      <StyledDrawer
+        anchor="left"
+        open={sidebarOpen}
+        onClose={handleSidebarToggle}
+        variant="temporary"
+        ModalProps={{
+          keepMounted: true, // Better open performance on mobile
+        }}
+      >
+        <Box sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
+          <SidebarHeader>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+              <Logo src={logo} alt="Logo" style={{ height: '35px' }} />
+              <Typography sx={{ fontWeight: 'bold', fontSize: '1.1rem' }}>
+                Menu
+              </Typography>
+            </Box>
+            <IconButton
+              onClick={handleSidebarToggle}
+              sx={{
+                color: 'white',
+                '&:hover': {
+                  backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                },
+              }}
+            >
+              <CloseIcon />
+            </IconButton>
+          </SidebarHeader>
+
+          <UserSection>
+            <Avatar
+              sx={{
+                bgcolor: '#1a004b',
+                width: 40,
+                height: 40,
+                fontSize: '1.2rem',
+              }}
+            >
+              {userName.charAt(0).toUpperCase()}
+            </Avatar>
+            <Box>
+              <Typography
+                sx={{
+                  fontWeight: 'bold',
+                  fontSize: '1rem',
+                  color: '#1a1a1a',
+                }}
+              >
+                {userName}
+              </Typography>
+            </Box>
+          </UserSection>
+
+          <List sx={{ p: 1, flexGrow: 1 }}>
+            {sidebarActions.map((action, index) => (
+              <ListItem key={index} disablePadding sx={{ mb: 1 }}>
+                <ListItemButton
+                  onClick={() => handleNavigation(action.path)}
+                  sx={{
+                    borderRadius: '0px',
+                    border: '1px solid #ddd',
+                    py: 1.5,
+                    px: 2,
+                    color: '#1a1a1a',
+                    '&:hover': {
+                      backgroundColor: '#eee',
+                      borderColor: '#bbb',
+                    },
+                  }}
+                >
+                  <ListItemText
+                    primary={action.name}
+                    primaryTypographyProps={{
+                      fontSize: '1rem',
+                    }}
+                  />
+                </ListItemButton>
+              </ListItem>
+            ))}
+          </List>
+
+          <Divider />
+          
+          <List sx={{ p: 1 }}>
+            <ListItem disablePadding>
+              <ListItemButton
+                onClick={handleLogout}
+                sx={{
+                  borderRadius: '0px',
+                  border: '1px solid #ddd',
+                  py: 1.5,
+                  px: 2,
+                  color: '#d32f2f',
+                  '&:hover': {
+                    backgroundColor: '#ffebee',
+                    borderColor: '#d32f2f',
+                  },
+                }}
+              >
+                <LogoutIcon sx={{ mr: 1.5, fontSize: '1.2rem' }} />
+                <ListItemText
+                  primary="Logout"
+                  primaryTypographyProps={{
+                    fontSize: '1rem',
+                    fontWeight: '500',
+                  }}
+                />
+              </ListItemButton>
+            </ListItem>
+          </List>
+        </Box>
+      </StyledDrawer>
+
+      {/* Spacer to push content below the fixed AppBar */}
+      <Toolbar />
     </>
   );
 }
+
 export default TopBarWithLogo;

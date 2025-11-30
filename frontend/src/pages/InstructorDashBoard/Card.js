@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import './Card.css';
-import STATUS_MAP from '../statusMap'; // Adjust the path as needed
 
 const Card = ({
   title,
@@ -13,7 +12,6 @@ const Card = ({
   createdAt,
   onApprove,
   onDeny,
-  status // Make sure this is passed from parent
 }) => {
   const [showTable, setShowTable] = useState(false);
 
@@ -22,16 +20,15 @@ const Card = ({
     setShowTable(!showTable);
   };
 
-  const statusSteps = Object.entries(STATUS_MAP).map(([key, value]) => ({
-    id: parseInt(key),
-    label: value
-  }));
-
   return (
     <div className="card">
       <h2>{title}</h2>
-      <p><span className="label">Project ID:</span> {projectID}</p>
-      <p><span className="label">Description:</span> {description}</p>
+      <p>
+        <span className="label">Project ID:</span> {projectID}
+      </p>
+      <p>
+        <span className="label">Description:</span> {description}
+      </p>
 
       <p>
         <span className="label">Components:</span>{' '}
@@ -71,36 +68,24 @@ const Card = ({
       )}
 
       <p>
-        <span className="label">Team:</span>{' '}
-        {team ? team : 'None'}
+        <span className="label">Team:</span> {team ? team : 'None'}
       </p>
 
       <p>
-        <span className="label">Project Guide:</span>{' '}
-        {guideID} - {guideName}
+        <span className="label">Project Guide:</span> {guideID} - {guideName}
       </p>
-
-      {/* Status Tracker */}
-      <div className="status-tracker">
-        {statusSteps.map((step, index) => (
-          <div
-            key={step.id}
-            className={`status-step ${step.id <= status ? 'completed' : ''}`}
-          >
-            <div className="status-dot"></div>
-            <span className="status-label">{step.label}</span>
-            {index !== statusSteps.length - 1 && <div className="status-line"></div>}
-          </div>
-        ))}
-      </div>
 
       <div className="card-footer">
         <div className="fter">
           Created: {new Date(createdAt).toLocaleDateString()}
         </div>
         <div className="card-buttons">
-          <button className="approve-btn" onClick={() => onApprove()}>Approve</button>
-          <button className="deny-btn" onClick={() => onDeny()}>Deny</button>
+          <button className="approve-btn" onClick={() => onApprove()}>
+            Approve
+          </button>
+          <button className="deny-btn" onClick={() => onDeny()}>
+            Deny
+          </button>
         </div>
       </div>
     </div>

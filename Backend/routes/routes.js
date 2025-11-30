@@ -19,6 +19,7 @@ const { createCart, getCarts, orderCart, getCart, updateCart, checkInCart } = re
 
 const {createVendor, getAllVendors} = require('../controllers/Vendor');
 
+const { getControls, updateControls } = require('../controllers/Controls');
 
 const { addToSlot, getTokenProject, updateDelivery, checkInVerify } = require('../controllers/Distribution');
 // --- Auth Routes ---
@@ -40,10 +41,14 @@ router.delete("/delete-component/:cID", auth, authorizeRole("Admin", "Manager"),
 router.put("/update-component/:cID", auth, authorizeRole("Admin", "Manager"), updateComponent);
 router.put("/make-available/:cID", auth,  makeAvailable);
 router.get("/get", getReqTable);
+
 // --- Team Routes ---
 router.post("/create-team", auth,  createTeam);
 router.get('/get-my-teams/:token', auth, getMyTeams);
 
+//Control Routes
+router.get('/controls/get', auth, getControls);
+router.put('/controls/update', auth, updateControls);
 // --- Project Routes ---
 router.post("/create-project",   createProject);
 router.get("/get-all-projects", auth, getAllProjects);
@@ -84,6 +89,7 @@ router.get("/get-all-vendors", auth, getAllVendors);
 
 // In your Express backend
 const Order = require('../models/Order');
+
 router.get('/orders/:orderID/invoice', async (req, res) => {
   try {
     const order = await Order.findOne({ orderID: req.params.orderID });

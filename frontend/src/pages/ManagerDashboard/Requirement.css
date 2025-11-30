@@ -1,0 +1,55 @@
+.requirement-section {
+  padding: 20px;
+  margin-top: 5rem;
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 0 8px rgba(0, 0, 0, 0.05);
+}
+
+.requirement-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.requirement-section h3 {
+  font-size: 1.2rem;
+  font-weight: bold;
+  margin: 0;
+}
+
+.export-btn {
+  background-color: #007bff;
+  color: #fff;
+  border: none;
+  padding: 6px 14px;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: background-color 0.2s ease;
+}
+
+.export-btn:hover {
+  background-color: #0056b3;
+}
+
+.requirement-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.requirement-table th,
+.requirement-table td {
+  border: 1px solid #ddd;
+  padding: 8px 10px;
+  text-align: left;
+}
+
+.requirement-table th {
+  background-color: #f4f4f4;
+}
+
+.requirement-table tr:nth-child(even) {
+  background-color: #fafafa;
+}

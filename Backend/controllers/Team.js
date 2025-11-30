@@ -40,7 +40,7 @@ exports.createTeam = async (req, res) => {
       batch:leadUser.batch
     });
     console.log(newTeam);
-    res.status(201).json({
+    res.status(201).json({ 
       success: true,
       message: 'Team created successfully!',
       data: newTeam

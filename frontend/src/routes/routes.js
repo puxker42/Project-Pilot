@@ -37,6 +37,7 @@ import ProjectApprovalManager from '../pages/InstructorDashBoard/ProjectApproval
 import GuidedProjects from '../pages/InstructorDashBoard/GuidedProjects';
 import ForgotPassword from '../pages/Authentication/ForgotPassword';
 import ResetPassword from '../pages/Authentication/ResetPassword';
+import Requirement from '../pages/ManagerDashboard/Requirements';
 const AppRoutes = () => (
   <Routes>
     {/* Public Routes */}
@@ -81,6 +82,7 @@ const AppRoutes = () => (
     <Route path='/project-in' element={<PrivateRoutes><ProjectCheckIn/></PrivateRoutes>}/>
     <Route path='/my-projects' element={<PrivateRoutes><MyProjects/></PrivateRoutes>}/>
     <Route path='/my-teams' element={<PrivateRoutes><MyTeams/></PrivateRoutes>}/>
+    <Route path='/view-requirements/fetch' element={<PrivateRoutes><Requirement/></PrivateRoutes>}/>
     <Route path="*" element={<UnderConstruction />} />
   </Routes>
 );

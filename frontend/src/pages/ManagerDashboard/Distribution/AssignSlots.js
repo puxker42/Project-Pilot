@@ -101,7 +101,7 @@ const AssignSlots = () => {
 
   return (
     <div className="assign-container">
-      <TopbarWithLogo title="Slot Assignment Master" />
+      <TopbarWithLogo  />
       <div className="masst">
         <div className="input-group">
           <label>Select Date:</label>

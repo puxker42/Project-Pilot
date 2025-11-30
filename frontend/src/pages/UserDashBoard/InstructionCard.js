@@ -20,7 +20,7 @@ const InstructionCard = () => {
           If any team member has an unfinished project, <strong>Admin approval</strong> is mandatory.
         </li>
         <li>
-          For Support Reach Admin or Raise your query at <a href="mailto:support.pilotwce@gmail.com"> support.pilotwce@gmail.com </a>
+          For Support Reach Admin or Raise your query at <a href="mailto:project.piloteg@gmail.com"> project.piloteg@gmail.com </a>
         </li>
       </ul>
     </div>

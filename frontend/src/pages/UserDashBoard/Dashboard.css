@@ -196,3 +196,43 @@
     width: 100%;
   }
 }
+/* === File Upload (Google Form Drive style) === */
+.project-table td input[type="file"] {
+  display: none; /* hide native input */
+}
+
+.file-upload-wrapper {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 14px;
+  border: 1px solid #dadce0;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  color: #1a73e8;
+  font-weight: 500;
+  background-color: #fff;
+  transition: all 0.2s ease;
+  max-width: 220px;
+}
+
+.file-upload-wrapper:hover {
+  background-color: #f1f3f4;
+  border-color: #c1c7d0;
+}
+
+.file-upload-icon {
+  font-size: 16px;
+  color: #5f6368;
+}
+
+.file-name {
+  font-size: 13px;
+  color: #202124;
+  font-weight: 400;
+  max-width: 150px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}

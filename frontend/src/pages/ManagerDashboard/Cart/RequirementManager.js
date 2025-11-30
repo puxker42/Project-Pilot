@@ -108,131 +108,128 @@ const RequirementManager = () => {
   };
 
   const handleAddEntry = () => {
-  const { ID, name, quantity } = newEntry;
-  if (!name || !quantity) return setError('Please enter name and quantity.');
+    const { ID, name, quantity } = newEntry;
+    if (!name || !quantity) return setError('Please enter name and quantity.');
 
-  const enteredQty = parseInt(quantity);
-  if (enteredQty <= 0 || isNaN(enteredQty)) {
-    return setError('Please enter a valid positive quantity.');
-  }
-
-  let updatedMidOrders = [...midOrders];
-  const existing = updatedMidOrders.find(item => item.ID === ID);
-  const masterMatch = masterComponents.find(c => c.cID === ID);
-  const isNewComponent = ID === 'TCR';
-
-  const resolvedName = existing?.name || masterMatch?.title || name;
-
-  if (!resolvedName && isNewComponent) {
-    return setError('Please enter a valid name for the new component.');
-  }
-
-  if (!isNewComponent && cartItems.some(c => c.ID === ID)) {
-    return setError('Duplicate ID entry is not allowed.');
-  }
-
-  let source = 'new';
-  if (existing) source = 'requirement';
-  else if (masterMatch) source = 'manual';
-
-  if (existing) {
-    const updatedQty = Math.min(enteredQty, existing.toOrder);
-    updatedMidOrders = updatedMidOrders.map(item =>
-      item.ID === ID
-        ? {
-            ...item,
-            toOrder: item.toOrder - updatedQty,
-            ordered: (item.ordered || 0) + updatedQty
-          }
-        : item
-    ).filter(item => item.toOrder > 0);
-  }
-
-  if (isNewComponent) {
-    alert('New component not found in system. Entry will be saved with ID "TCR".\nYou have to create component while checkIn');
-  }
-
-  setCartItems(prev => [
-    ...prev,
-    {
-      ID: isNewComponent ? 'TCR' : ID,
-      Name: resolvedName,
-      orderedQuantity: enteredQty,
-      __source: source  // Internal tag for restore logic
+    const enteredQty = parseInt(quantity);
+    if (enteredQty <= 0 || isNaN(enteredQty)) {
+      return setError('Please enter a valid positive quantity.');
     }
-  ]);
 
-  setMidOrders(updatedMidOrders);
-  setNewEntry({ ID: '', name: '', quantity: '' });
-  setIsNameLocked(false);
-  setSuggestions([]);
-  setError('');
-};
+    let updatedMidOrders = [...midOrders];
+    const existing = updatedMidOrders.find(item => item.ID === ID);
+    const masterMatch = masterComponents.find(c => c.cID === ID);
+    const isNewComponent = ID === 'TCR';
 
+    const resolvedName = existing?.name || masterMatch?.title || name;
+
+    if (!resolvedName && isNewComponent) {
+      return setError('Please enter a valid name for the new component.');
+    }
+
+    if (!isNewComponent && cartItems.some(c => c.ID === ID)) {
+      return setError('Duplicate ID entry is not allowed.');
+    }
+
+    let source = 'new';
+    if (existing) source = 'requirement';
+    else if (masterMatch) source = 'manual';
+
+    if (existing) {
+      const updatedQty = Math.min(enteredQty, existing.toOrder);
+      updatedMidOrders = updatedMidOrders.map(item =>
+        item.ID === ID
+          ? {
+              ...item,
+              toOrder: item.toOrder - updatedQty,
+              ordered: (item.ordered || 0) + updatedQty
+            }
+          : item
+      ).filter(item => item.toOrder > 0);
+    }
+
+    if (isNewComponent) {
+      alert('New component not found in system. Entry will be saved with ID "TCR".\nYou have to create component while checkIn');
+    }
+
+    setCartItems(prev => [
+      ...prev,
+      {
+        ID: isNewComponent ? 'TCR' : ID,
+        Name: resolvedName,
+        orderedQuantity: enteredQty,
+        __source: source
+      }
+    ]);
+
+    setMidOrders(updatedMidOrders);
+    setNewEntry({ ID: '', name: '', quantity: '' });
+    setIsNameLocked(false);
+    setSuggestions([]);
+    setError('');
+  };
 
   const handleRemoveEntry = (index) => {
-  const itemToRemove = cartItems[index];
-  const updatedCart = [...cartItems];
-  updatedCart.splice(index, 1);
+    const itemToRemove = cartItems[index];
+    const updatedCart = [...cartItems];
+    updatedCart.splice(index, 1);
 
-  const source = itemToRemove.__source;
+    const source = itemToRemove.__source;
 
-  if (source === 'requirement') {
-    const original = initialMidOrders.find(item => item.ID === itemToRemove.ID);
-    if (original) {
-      const alreadyExists = midOrders.find(item => item.ID === original.ID);
-      if (alreadyExists) {
-        setMidOrders(midOrders.map(item =>
-          item.ID === original.ID
-            ? {
-                ...item,
-                toOrder: item.toOrder + itemToRemove.orderedQuantity,
-                ordered: Math.max((item.ordered || 0) - itemToRemove.orderedQuantity, 0)
-              }
-            : item
-        ));
-      } else {
-        setMidOrders([
-          ...midOrders,
-          {
-            ...original,
-            toOrder: itemToRemove.orderedQuantity,
-            ordered: Math.max((original.ordered || 0) - itemToRemove.orderedQuantity, 0)
-          }
-        ]);
+    if (source === 'requirement') {
+      const original = initialMidOrders.find(item => item.ID === itemToRemove.ID);
+      if (original) {
+        const alreadyExists = midOrders.find(item => item.ID === original.ID);
+        if (alreadyExists) {
+          setMidOrders(midOrders.map(item =>
+            item.ID === original.ID
+              ? {
+                  ...item,
+                  toOrder: item.toOrder + itemToRemove.orderedQuantity,
+                  ordered: Math.max((item.ordered || 0) - itemToRemove.orderedQuantity, 0)
+                }
+              : item
+          ));
+        } else {
+          setMidOrders([
+            ...midOrders,
+            {
+              ...original,
+              toOrder: itemToRemove.orderedQuantity,
+              ordered: Math.max((original.ordered || 0) - itemToRemove.orderedQuantity, 0)
+            }
+          ]);
+        }
       }
+    } else if (source === 'manual') {
+      const master = masterComponents.find(c => c.cID === itemToRemove.ID);
+      setMidOrders(prev => [
+        ...prev,
+        {
+          ID: itemToRemove.ID,
+          name: itemToRemove.Name,
+          reqty: 0,
+          available: master.qnty || 0,
+          ordered: 0,
+          toOrder: itemToRemove.orderedQuantity
+        }
+      ]);
+    } else {
+      setMidOrders(prev => [
+        ...prev,
+        {
+          ID: itemToRemove.ID,
+          name: itemToRemove.Name,
+          reqty: 0,
+          available: 0,
+          ordered: 0,
+          toOrder: itemToRemove.orderedQuantity
+        }
+      ]);
     }
-  } else if (source === 'manual') {
-    const master = masterComponents.find(c => c.cID === itemToRemove.ID);
-    setMidOrders(prev => [
-      ...prev,
-      {
-        ID: itemToRemove.ID,
-        name: itemToRemove.Name,
-        reqty: 0,
-        available: master.qnty || 0,
-        ordered: 0,
-        toOrder: itemToRemove.orderedQuantity
-      }
-    ]);
-  } else {
-    // source === 'new'
-    setMidOrders(prev => [
-      ...prev,
-      {
-        ID: itemToRemove.ID,
-        name: itemToRemove.Name,
-        reqty: 0,
-        available: 0,
-        ordered: 0,
-        toOrder: itemToRemove.orderedQuantity
-      }
-    ]);
-  }
 
-  setCartItems(updatedCart);
-};
-
+    setCartItems(updatedCart);
+  };
 
   const handleSaveCart = async () => {
     try {
@@ -249,7 +246,6 @@ const RequirementManager = () => {
           checkInDate: cart.checkInDate || undefined,
           token: token,
           details: cartItems.map(({ __source, ...rest }) => rest)
-
         };
 
         res2 = await axios.put(`${BASE_URL}/update-cart`, updatedCart, {
@@ -329,7 +325,8 @@ const RequirementManager = () => {
   return (
     <div className="req-container">
       <TopBarWithLogo title='Cart Master' />
-      <div className='mstt'>
+      {/* ✅ Removed top margin / padding by styling inline */}
+      <div className='mstt' style={{ paddingTop: '0px', marginTop: '0px' }}>
         {editMode && (
           <div className="edit-banner">
             <strong>Editing Cart:</strong> {cart?.ID || 'Cart ID not found'}

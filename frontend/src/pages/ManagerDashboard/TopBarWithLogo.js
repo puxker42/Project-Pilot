@@ -1,10 +1,69 @@
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { FaBars, FaUserCircle, FaSignOutAlt } from 'react-icons/fa';
+import {
+  AppBar,
+  Toolbar,
+  Box,
+  IconButton,
+  Typography,
+  Drawer,
+  List,
+  ListItem,
+  ListItemButton,
+  ListItemText,
+  Menu,
+  MenuItem,
+  Avatar
+} from '@mui/material';
+import {
+  Menu as MenuIcon,
+  Logout as LogoutIcon
+} from '@mui/icons-material';
+import { styled } from '@mui/material/styles';
 import logo from '../../images/logo.png';
-import './TopBarWithLogo.css';
 
 const BASE_URL = process.env.REACT_APP_API_BASE_URL;
+
+// Styled Components
+const StyledAppBar = styled(AppBar)(({ theme }) => ({
+  backgroundColor: '#1a004b',
+  height: '60px',
+  boxShadow: '0 2px 5px rgba(0, 0, 0, 0.2)',
+}));
+
+const StyledToolbar = styled(Toolbar)({
+  minHeight: '60px',
+  padding: '0 24px',
+  display: 'flex',
+  justifyContent: 'space-between',
+});
+
+const Logo = styled('img')({
+  height: '40px',
+  filter: 'drop-shadow(0 0 10px rgba(255, 255, 255, 0.5))',
+});
+
+const StyledDrawer = styled(Drawer)(({ theme }) => ({
+  '& .MuiDrawer-paper': {
+    width: '250px',
+    top: '60px',
+    height: 'calc(100vh - 60px)',
+    backgroundColor: '#fafafa',
+    boxShadow: '2px 0 5px rgba(0, 0, 0, 0.1)',
+    [theme.breakpoints.down('sm')]: {
+      width: '100%',
+    },
+  },
+}));
+
+const UserName = styled(Typography)({
+  fontWeight: 'bold',
+  fontSize: '1rem',
+  cursor: 'pointer',
+  '@media (max-width: 768px)': {
+    fontSize: '0.95rem',
+  },
+});
 
 async function getUserData() {
   try {
@@ -27,41 +86,52 @@ async function getUserData() {
   }
 }
 
-function TopBarWithLogo({ title }) {
+function TopBarWithLogo({title = 'Department of Electronics Engineering    |     Projects Management System' }) {
   const [userName, setUserName] = useState('');
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [dropdownOpen, setDropdownOpen] = useState(false);
-  const sidebarRef = useRef(null);
-  const dropdownRef = useRef(null);
+  const [anchorEl, setAnchorEl] = useState(null);
   const navigate = useNavigate();
+const sidebarActions = [
 
-  const sidebarActions = [
     { name: 'Projects', path: '/all-projects' },
-    { name: 'Create Cart', path: '/get-order' },
-    { name: 'Component Info', path: '/search-components' },
-    { name: 'View Carts', path: '/view-carts', triggerGenerate: true },
-    { name: 'Create Component', path: '/create-component'},
-    { name: 'Assign Slots', path:'/assign-slot'},
-    { name: 'Distribute Components', path:'/check-out'},
-    { name: 'Check-In', path:'/check-in'},
-    { name: 'View Requirements', path:'/view-requirements/fetch'}
-  ];
 
+    { name: 'Create Cart', path: '/get-order' },
+
+    { name: 'Component Info', path: '/search-components' },
+
+    { name: 'View Carts', path: '/view-carts', triggerGenerate: true },
+
+    { name: 'Create Component', path: '/create-component'},
+
+    { name: 'Assign Slots', path:'/assign-slot'},
+
+    { name: 'Distribute Components', path:'/check-out'},
+
+    { name: 'Check-In', path:'/check-in'},
+
+    { name: 'View Requirements', path:'/view-requirements/fetch'}
+
+  ];
   const handleLogout = () => {
     localStorage.removeItem('token');
     navigate('/');
   };
 
-  
+  const handleMenuOpen = (event) => {
+    setAnchorEl(event.currentTarget);
+  };
 
-  const handleClickOutside = (e) => {
-    if (sidebarOpen && sidebarRef.current && !sidebarRef.current.contains(e.target)) {
-      setSidebarOpen(false);
-    }
+  const handleMenuClose = () => {
+    setAnchorEl(null);
+  };
 
-    if (dropdownOpen && dropdownRef.current && !dropdownRef.current.contains(e.target)) {
-      setDropdownOpen(false);
-    }
+  const handleSidebarToggle = () => {
+    setSidebarOpen(!sidebarOpen);
+  };
+
+  const handleNavigation = (path) => {
+    navigate(path);
+    setSidebarOpen(false);
   };
 
   useEffect(() => {
@@ -71,40 +141,118 @@ function TopBarWithLogo({ title }) {
       setUserName(firstName);
     }
     fetchData();
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
   return (
     <>
-      <div className="topbar-with-logo">
-        <div className="logo-title-container">
-          <FaBars className="menu-icon" onClick={() => setSidebarOpen(!sidebarOpen)} />
-          <img src={logo} alt="Logo" className="topbar-logo" />
-          <span className="topbar-title">{title}</span>
-        </div>
-        <div className="user-info1" ref={dropdownRef}>
-          <div className="dropdown1" onClick={() => setDropdownOpen(!dropdownOpen)}>
-            <p className="pnm1">{userName}</p>
-            {dropdownOpen && (
-              <div className="dropdown-content1">
-                <button onClick={handleLogout}>
-                  <FaSignOutAlt className="icon1" /> Logout
-                </button>
-              </div>
-            )}
-          </div>
-        </div>
-      </div>
+      <StyledAppBar position="fixed">
+        <StyledToolbar>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+            <IconButton
+              color="inherit"
+              edge="start"
+              onClick={handleSidebarToggle}
+              sx={{ fontSize: '1.5rem' }}
+            >
+              <MenuIcon />
+            </IconButton>
+            <Logo src={logo} alt="Logo" />
+            <Typography
+              variant="h6"
+              sx={{
+                fontWeight: 'bold',
+                fontSize: '1.4rem',
+                '@media (max-width: 768px)': {
+                  fontSize: '1.1rem',
+                },
+              }}
+            >
+              {title}
+            </Typography>
+          </Box>
 
-      <div ref={sidebarRef} className={`sidebar-collapse ${sidebarOpen ? 'open' : ''}`}>
-        {sidebarActions.map((action, index) => (
-          <button key={index} onClick={() => navigate(action.path)}>
-            {action.name}
-          </button>
-        ))}
-      </div>
+          <Box sx={{ display: 'flex', alignItems: 'center' }}>
+            <UserName onClick={handleMenuOpen}>
+              {userName}
+            </UserName>
+            <Menu
+              anchorEl={anchorEl}
+              open={Boolean(anchorEl)}
+              onClose={handleMenuClose}
+              anchorOrigin={{
+                vertical: 'bottom',
+                horizontal: 'right',
+              }}
+              transformOrigin={{
+                vertical: 'top',
+                horizontal: 'right',
+              }}
+              PaperProps={{
+                sx: {
+                  mt: 1.5,
+                  minWidth: '160px',
+                  boxShadow: '0 8px 16px rgba(0, 0, 0, 0.2)',
+                  borderRadius: '6px',
+                },
+              }}
+            >
+              <MenuItem
+                onClick={() => {
+                  handleLogout();
+                  handleMenuClose();
+                }}
+                sx={{
+                  color: '#2e0d6e',
+                  fontSize: '0.95rem',
+                  py: 1.25,
+                  px: 2.5,
+                }}
+              >
+                <LogoutIcon sx={{ mr: 1.25, fontSize: '1.1rem' }} />
+                Logout
+              </MenuItem>
+            </Menu>
+          </Box>
+        </StyledToolbar>
+      </StyledAppBar>
+
+      <StyledDrawer
+        anchor="left"
+        open={sidebarOpen}
+        onClose={handleSidebarToggle}
+        variant="temporary"
+      >
+        <List sx={{ p: 1 }}>
+          {sidebarActions.map((action, index) => (
+            <ListItem key={index} disablePadding>
+              <ListItemButton
+                onClick={() => handleNavigation(action.path)}
+                sx={{
+                  borderRadius: '4px',
+                  py: 1.5,
+                  px: 2,
+                  color: '#1a1a1a',
+                  '&:hover': {
+                    backgroundColor: '#eee',
+                  },
+                }}
+              >
+                <ListItemText
+                  primary={action.name}
+                  primaryTypographyProps={{
+                    fontSize: '1rem',
+                  }}
+                />
+              </ListItemButton>
+            </ListItem>
+          ))}
+        </List>
+      </StyledDrawer>
+
+      {/* Spacer to push content below the fixed AppBar */}
+      <Toolbar />
     </>
   );
 }
+
 export default TopBarWithLogo;
