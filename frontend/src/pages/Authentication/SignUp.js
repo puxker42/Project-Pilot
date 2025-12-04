@@ -228,9 +228,7 @@ function SignUp() {
             )}
           </form>
 
-          <footer className='signup-footer'>
-            © 2025 Walchand College of Engineering, Sangli. All rights reserved.
-          </footer>
+
         </div>
       </div>
     </div>

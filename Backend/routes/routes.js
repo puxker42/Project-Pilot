@@ -8,54 +8,61 @@ const { auth, authorizeRole, getUserEmail } = require('../middlewares');
 const { login, signUp, verifyOTP, getCurrentUser, verifyToken, sendOTP, sendInstructioMail, changePassword } = require("../controllers/Auth");
 
 // Project Controllers
-const { createProject, getAllProjects, getAllUsers, getUserProjects, updateProjectApproval, updateProjectComponents, projectReturn, getGuidedProjects } = require("../controllers/Project");
+const { createProject, getAllProjects, getAllUsers, getUserProjects, updateProjectApproval, updateProjectComponents, projectReturn, getGuidedProjects, uploadReport, sendReportForApproval, updateReportStatus } = require("../controllers/Project");
 
 // Component controllers
-const {getAllComponents, deleteComponent, createComponent, getComponent, updateComponent, makeAvailable, getRequiredOrder, getMidOrder, createOrder, fetchMidOrder, updateMidOrder, getReqTable, createComponentInForm} = require("../controllers/Components");
+const { getAllComponents, deleteComponent, createComponent, getComponent, updateComponent, makeAvailable, getRequiredOrder, getMidOrder, createOrder, fetchMidOrder, updateMidOrder, getReqTable, createComponentInForm } = require("../controllers/Components");
 const { createTeam, getMyTeams } = require('../controllers/Team');
 
 //Cart Controllers
 const { createCart, getCarts, orderCart, getCart, updateCart, checkInCart } = require('../controllers/Cart');
 
-const {createVendor, getAllVendors} = require('../controllers/Vendor');
+const { createVendor, getAllVendors } = require('../controllers/Vendor');
 
 const { getControls, updateControls } = require('../controllers/Controls');
 
 const { addToSlot, getTokenProject, updateDelivery, checkInVerify } = require('../controllers/Distribution');
+const { uploadFile } = require('../controllers/FileHandler');
 // --- Auth Routes ---
 router.post("/login", login);
 router.post("/signup", signUp);
 router.post("/verify", verifyOTP);
-router.get("/get-all-users",   getAllUsers);
-router.get("/me",auth,  getCurrentUser);
+router.get("/get-all-users", getAllUsers);
+router.get("/me", auth, getCurrentUser);
 router.get("/verify-token", verifyToken);
 router.post("/auth/sendotp", sendOTP);
 router.post("/auth/forgot-pass", getUserEmail, sendInstructioMail);
 router.post("/auth/reset-password", changePassword);
 // --- Component Routes ---
-router.post("/create-component", auth,  createComponent);
-router.post("/create-component/form", auth,  createComponentInForm);
+router.post("/create-component", auth, createComponent);
+router.post("/create-component/form", auth, createComponentInForm);
 router.get("/get-all-components", getAllComponents);
 router.get("/get-component/:cID", auth, getComponent);
 router.delete("/delete-component/:cID", auth, authorizeRole("Admin", "Manager"), deleteComponent);
 router.put("/update-component/:cID", auth, authorizeRole("Admin", "Manager"), updateComponent);
-router.put("/make-available/:cID", auth,  makeAvailable);
+router.put("/make-available/:cID", auth, makeAvailable);
 router.get("/get", getReqTable);
 
 // --- Team Routes ---
-router.post("/create-team", auth,  createTeam);
+router.post("/create-team", auth, createTeam);
 router.get('/get-my-teams/:token', auth, getMyTeams);
 
 //Control Routes
 router.get('/controls/get', auth, getControls);
 router.put('/controls/update', auth, updateControls);
+
 // --- Project Routes ---
-router.post("/create-project",   createProject);
+router.post("/create-project", createProject);
 router.get("/get-all-projects", auth, getAllProjects);
-router.get("/projects-me", auth,  getUserProjects);
+router.get("/projects-me", auth, getUserProjects);
 router.put("/:projectID/approval", auth, updateProjectApproval);
 router.get("/get-guided-projects", auth, getGuidedProjects);
 router.put('/update-project-components/:projectId', auth, updateProjectComponents);
+
+// Report Routes
+router.post("/projects/:projectId/report/upload", auth, uploadReport);
+router.post("/projects/:projectId/report/send", auth, sendReportForApproval);
+router.put("/projects/:projectId/report/:reportNumber/status", auth, updateReportStatus);
 // Optional: Future Protected Controls
 // router.put("/get-controls", auth, authorizeRole("Instructor"), yourController);
 
@@ -86,6 +93,9 @@ router.get("/get-all-vendors", auth, getAllVendors);
 
 
 
+
+// --- File Routes ---
+router.post("/upload", auth, uploadFile);
 
 // In your Express backend
 const Order = require('../models/Order');

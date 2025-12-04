@@ -213,11 +213,6 @@ function ResetPassword() {
             </button>
           </form>
 
-          {/* Copyright */}
-          <footer className="reset-footer">
-            © 2025 Walchand College of Engineering, Sangli. All rights reserved.<br />
-            Designed, Developed & Implemented by <strong>Pushkar Nashikkar</strong>
-          </footer>
         </div>
       </div>
     </div>

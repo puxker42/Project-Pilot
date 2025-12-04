@@ -46,9 +46,9 @@ const AppRoutes = () => (
     <Route path="/log-fail" element={<LoginFailed />} />
     <Route path="/sign-suc" element={<SignSuc />} />
     <Route path="/sign-fail" element={<SignFail />} />
-    <Route path="/auth/forgot-pass" element={<ForgotPassword/>}/>
-    <Route path='/auth/reset-password' element={<ResetPassword/>}/>
-    
+    <Route path="/auth/forgot-pass" element={<ForgotPassword />} />
+    <Route path='/auth/reset-password' element={<ResetPassword />} />
+
     {/* Protected Routes - Dashboards */}
     <Route path="/admin-dashboard" element={<PrivateRoutes><AdminDashboard /></PrivateRoutes>} />
     <Route path="/student-dashboard" element={<PrivateRoutes><StudentDashboard /></PrivateRoutes>} />
@@ -60,30 +60,30 @@ const AppRoutes = () => (
     <Route path="/create-team" element={<PrivateRoutes><CreateTeam /></PrivateRoutes>} />
     {/* <Route path="/projects" element={<PrivateRoutes><ProjectsAssociated /></PrivateRoutes>} /> */}
     <Route path="/update-project" element={<PrivateRoutes><UnderConstruction /></PrivateRoutes>} />
-    <Route path='/all-projects' element={<PrivateRoutes><ProjectDashboard/></PrivateRoutes>}/>
+    <Route path='/all-projects' element={<PrivateRoutes><ProjectDashboard /></PrivateRoutes>} />
     {/* Protected Routes - Status Pages */}
     <Route path="/project-fail" element={<PrivateRoutes><FailurePage /></PrivateRoutes>} />
     <Route path="/project-success" element={<PrivateRoutes><SuccessPage /></PrivateRoutes>} />
 
     {/* Instructor Routes */}
-    <Route path='/projects-to-approve' element={<PrivateRoutes><ProjectApprovalManager/></PrivateRoutes>}/>
-    <Route path='/projects-under-me' element={<PrivateRoutes><GuidedProjects/></PrivateRoutes>}/>
+    <Route path='/projects-to-approve' element={<PrivateRoutes><ProjectApprovalManager /></PrivateRoutes>} />
+    <Route path='/projects-under-me' element={<PrivateRoutes><GuidedProjects /></PrivateRoutes>} />
     {/*Managet Routes */}
-    <Route path='/search-components' element={<PrivateRoutes><Inventory/></PrivateRoutes>}/>
-    <Route path='/get-order' element={<PrivateRoutes><RequirementManager/></PrivateRoutes>}/>
-    <Route path='/view-carts' element={<PrivateRoutes><ViewCarts/></PrivateRoutes>}/>
-    <Route path='/cart-order/:cartID' element={<PrivateRoutes><Order/></PrivateRoutes>}/>
-    <Route path="/cart-check-in/:id" element={<PrivateRoutes><CheckIn/></PrivateRoutes>} />
-    <Route path='/check-in' element={<PrivateRoutes><CheckInLand/></PrivateRoutes>}/>
-    <Route path='/create-component' element={<PrivateRoutes><CreateComponent/></PrivateRoutes>}/>
-    <Route path='/assign-slot' element={<PrivateRoutes><AssignSlots/></PrivateRoutes>}/>
-    <Route path='/check-out' element={<PrivateRoutes><Distribute/></PrivateRoutes>}/>
+    <Route path='/search-components' element={<PrivateRoutes><Inventory /></PrivateRoutes>} />
+    <Route path='/get-order' element={<PrivateRoutes><RequirementManager /></PrivateRoutes>} />
+    <Route path='/view-carts' element={<PrivateRoutes><ViewCarts /></PrivateRoutes>} />
+    <Route path='/cart-order/:cartID' element={<PrivateRoutes><Order /></PrivateRoutes>} />
+    <Route path="/cart-check-in/:id" element={<PrivateRoutes><CheckIn /></PrivateRoutes>} />
+    <Route path='/check-in' element={<PrivateRoutes><CheckInLand /></PrivateRoutes>} />
+    <Route path='/create-component' element={<PrivateRoutes><CreateComponent /></PrivateRoutes>} />
+    <Route path='/assign-slot' element={<PrivateRoutes><AssignSlots /></PrivateRoutes>} />
+    <Route path='/check-out' element={<PrivateRoutes><Distribute /></PrivateRoutes>} />
     <Route path="/student/acknowledgement/:projectID/:token" element={<VerifyDelivery />} />
-    <Route path='/project-in' element={<PrivateRoutes><ProjectCheckIn/></PrivateRoutes>}/>
-    <Route path='/my-projects' element={<PrivateRoutes><MyProjects/></PrivateRoutes>}/>
-    <Route path='/my-teams' element={<PrivateRoutes><MyTeams/></PrivateRoutes>}/>
-    <Route path='/view-requirements/fetch' element={<PrivateRoutes><Requirement/></PrivateRoutes>}/>
-    <Route path="*" element={<UnderConstruction />} />
+    <Route path='/project-in' element={<PrivateRoutes><ProjectCheckIn /></PrivateRoutes>} />
+    <Route path='/my-projects' element={<PrivateRoutes><MyProjects /></PrivateRoutes>} />
+    <Route path='/my-teams' element={<PrivateRoutes><MyTeams /></PrivateRoutes>} />
+    <Route path='/view-requirements/fetch' element={<PrivateRoutes><Requirement /></PrivateRoutes>} />
+    <Route path="*" element={<PageNotFound />} />
   </Routes>
 );
 

@@ -3,6 +3,8 @@ import './MyProjects.css';
 import STATUS_MAP from '../statusMap';
 import TopBarWithLogo from './TopBarWithLogo';
 import NoDataFound from '../../components/NoDataFound'; // Adjust path as per your structure
+import ReportUploadSlot from '../../components/ReportUploadSlot';
+import { Dialog, DialogTitle, DialogContent, DialogActions, Button } from '@mui/material';
 
 const BASE_URL = process.env.REACT_APP_API_BASE_URL;
 const ITEMS_PER_PAGE = 3;
@@ -15,11 +17,17 @@ function MyProjects() {
   const [selectedComponents, setSelectedComponents] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
 
+  // Report State
+  const [selectedProjectForReports, setSelectedProjectForReports] = useState(null);
+  const [userYear, setUserYear] = useState(null);
+
   useEffect(() => {
-    const fetchProjects = async () => {
+    const fetchData = async () => {
       try {
         const token = localStorage.getItem('token');
-        const response = await fetch(`${BASE_URL}/projects-me`, {
+
+        // Fetch Projects
+        const projectsRes = await fetch(`${BASE_URL}/projects-me`, {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',
@@ -27,19 +35,34 @@ function MyProjects() {
           },
         });
 
-        if (!response.ok) throw new Error('Failed to fetch projects');
+        // Fetch User Details for Year
+        const userRes = await fetch(`${BASE_URL}/me`, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            authorization: `Bearer ${token}`,
+          },
+        });
 
-        const data = await response.json();
-        setProjects(data);
-        setFilteredProjects(data);
+        if (!projectsRes.ok) throw new Error('Failed to fetch projects');
+
+        const projectsData = await projectsRes.json();
+        setProjects(projectsData);
+        setFilteredProjects(projectsData);
+
+        if (userRes.ok) {
+          const userData = await userRes.json();
+          setUserYear(userData.data.year); // Assuming response structure { success: true, data: { ... } }
+        }
+
       } catch (error) {
-        console.error('Error fetching projects:', error);
+        console.error('Error fetching data:', error);
       } finally {
         setLoading(false);
       }
     };
 
-    fetchProjects();
+    fetchData();
   }, []);
 
   useEffect(() => {
@@ -66,6 +89,66 @@ function MyProjects() {
         {i < members.length - 1 && ', '}
       </span>
     ));
+
+  const refreshProjects = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch(`${BASE_URL}/projects-me`, {
+        headers: { authorization: `Bearer ${token}` },
+      });
+      const data = await response.json();
+      setProjects(data);
+      setFilteredProjects(data);
+
+      // Update selected project if open
+      if (selectedProjectForReports) {
+        const updatedProject = data.find(p => p.ID === selectedProjectForReports.ID);
+        setSelectedProjectForReports(updatedProject);
+      }
+    } catch (error) {
+      console.error("Error refreshing projects", error);
+    }
+  };
+
+  const handleUploadReport = async (reportNumber, fileUrl) => {
+    if (!selectedProjectForReports) return;
+    try {
+      const token = localStorage.getItem('token');
+      const res = await fetch(`${BASE_URL}/projects/${selectedProjectForReports.ID}/report/upload`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ reportNumber, fileUrl })
+      });
+      if (res.ok) {
+        await refreshProjects();
+      }
+    } catch (error) {
+      console.error("Upload error", error);
+    }
+  };
+
+  const handleSendReport = async (reportNumber) => {
+    if (!selectedProjectForReports) return;
+    try {
+      const token = localStorage.getItem('token');
+      const res = await fetch(`${BASE_URL}/projects/${selectedProjectForReports.ID}/report/send`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ reportNumber })
+      });
+      if (res.ok) {
+        await refreshProjects();
+      }
+    } catch (error) {
+      console.error("Send error", error);
+    }
+  };
 
   return (
     <div>
@@ -95,6 +178,7 @@ function MyProjects() {
                   <th>View Components</th>
                   <th>Guide Info</th>
                   <th>Status</th>
+                  <th>Reports</th>
                 </tr>
               </thead>
               <tbody>
@@ -126,6 +210,15 @@ function MyProjects() {
                       <span className={`status-badge status-${project.status}`}>
                         {STATUS_MAP[project.status] ?? 'Unknown Status'}
                       </span>
+                    </td>
+                    <td>
+                      <Button
+                        variant="outlined"
+                        size="small"
+                        onClick={() => setSelectedProjectForReports(project)}
+                      >
+                        Manage Reports
+                      </Button>
                     </td>
                   </tr>
                 ))}
@@ -183,6 +276,43 @@ function MyProjects() {
           </div>
         )}
       </div>
+
+      {/* Report Management Dialog */}
+      <Dialog
+        open={!!selectedProjectForReports}
+        onClose={() => setSelectedProjectForReports(null)}
+        maxWidth="md"
+        fullWidth
+      >
+        <DialogTitle>
+          Project Reports - {selectedProjectForReports?.title}
+        </DialogTitle>
+        <DialogContent dividers>
+          {/* Report 1 */}
+          <ReportUploadSlot
+            reportNumber={1}
+            projectId={selectedProjectForReports?.ID}
+            report={selectedProjectForReports?.reports?.find(r => r.reportNumber === 1)}
+            onUpload={handleUploadReport}
+            onSendForApproval={handleSendReport}
+          />
+
+          {/* Report 2 - Only for Year 4 */}
+          {userYear === 4 && (
+            <ReportUploadSlot
+              reportNumber={2}
+              projectId={selectedProjectForReports?.ID}
+              report={selectedProjectForReports?.reports?.find(r => r.reportNumber === 2)}
+              onUpload={handleUploadReport}
+              onSendForApproval={handleSendReport}
+              disabled={!selectedProjectForReports?.reports?.find(r => r.reportNumber === 1)}
+            />
+          )}
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setSelectedProjectForReports(null)}>Close</Button>
+        </DialogActions>
+      </Dialog>
     </div>
   );
 }

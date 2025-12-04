@@ -139,11 +139,6 @@ function ForgotPassword() {
             </div>
           </form>
 
-          {/* Copyright */}
-          <footer className="forgot-footer">
-            © 2025 Walchand College of Engineering, Sangli. All rights reserved.<br />
-            Designed, Developed & Implemented by <strong>Pushkar Nashikkar</strong>
-          </footer>
         </div>
       </div>
     </div>

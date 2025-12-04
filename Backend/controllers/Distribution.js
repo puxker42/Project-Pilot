@@ -32,7 +32,12 @@ exports.addToSlot = async (req, res) => {
             slotn: slot,
             date: new Date(date),
           },
-          slotAssigned: true
+          slot: {
+            slotn: slot,
+            date: new Date(date),
+          },
+          slotAssigned: true,
+          status: 3
         },
       },
       { new: true }
@@ -138,27 +143,27 @@ exports.checkInVerify = async (req, res) => {
     const start = Date.now();
 
     while (Date.now() - start < maxWaitTime) {
-  const latestProject = await Project.findById(updatedProject._id);
-  console.log("🔄 Polling... current ack =", latestProject?.ack);
+      const latestProject = await Project.findById(updatedProject._id);
+      console.log("🔄 Polling... current ack =", latestProject?.ack);
 
-  if (latestProject?.ack === 1) {
-    return res.status(200).json({
-      success: true,
-      message: 'Acknowledgement received successfully.',
-      ackk: true
-    });
-  }
+      if (latestProject?.ack === 1) {
+        return res.status(200).json({
+          success: true,
+          message: 'Acknowledgement received successfully.',
+          ackk: true
+        });
+      }
 
-  if (latestProject?.ack === 0) {
-    return res.status(200).json({
-      success: true,
-      message: 'Acknowledgement rejected',
-      ackk: false
-    });
-  }
+      if (latestProject?.ack === 0) {
+        return res.status(200).json({
+          success: true,
+          message: 'Acknowledgement rejected',
+          ackk: false
+        });
+      }
 
-  await new Promise(resolve => setTimeout(resolve, pollInterval));
-}
+      await new Promise(resolve => setTimeout(resolve, pollInterval));
+    }
 
     // ⏰ Timeout
     return res.status(408).json({
@@ -231,6 +236,11 @@ exports.updateDelivery = async (req, res) => {
 
     if (updatedProject.status) {
       updatedFields.status = updatedProject.status;
+    }
+
+    // Force status update if delivery is acknowledged
+    if (!denied) {
+      updatedFields.status = 4;
     }
 
     if (updatedProject.remarks) {

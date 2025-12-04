@@ -1,4 +1,6 @@
 // src/utils/api.js
+import { toast } from 'react-toastify';
+
 export const authorizedRequest = async (url, method = 'GET', body = null) => {
   const token = localStorage.getItem('token');
 
@@ -7,12 +9,31 @@ export const authorizedRequest = async (url, method = 'GET', body = null) => {
     'Authorization': `Bearer ${token}`,
   };
 
-  const res = await fetch(`http://localhost:4000/api/v1/${url}`, {
-    method,
-    headers,
-    body: body ? JSON.stringify(body) : null,
-  });
+  try {
+    const res = await fetch(`${process.env.REACT_APP_API_BASE_URL}/${url}`, {
+      method,
+      headers,
+      body: body ? JSON.stringify(body) : null,
+    });
 
-  const data = await res.json();
-  return { status: res.status, data };
+    let data;
+    try {
+      data = await res.json();
+    } catch (err) {
+      console.error("Failed to parse JSON response:", err);
+      data = { message: "Invalid response from server" };
+    }
+
+    if (!res.ok) {
+      const errorMessage = data.message || data.error || 'Something went wrong';
+      // Prevent duplicate toasts or spamming? For now, just show it.
+      toast.error(errorMessage);
+    }
+
+    return { status: res.status, data };
+  } catch (error) {
+    console.error("API Request Error:", error);
+    toast.error("Network error. Please check your connection.");
+    return { status: 500, data: { success: false, message: "Network Error" } };
+  }
 };

@@ -7,7 +7,7 @@ import logo from '../../images/logo.png';
 async function getUserData() {
   try {
     const token = localStorage.getItem('token');
-    const response = await fetch("http://localhost:4000/api/v1/me", {
+    const response = await fetch(`${process.env.REACT_APP_API_BASE_URL}/me`, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
@@ -75,17 +75,17 @@ function Sidebar() {
           <button onClick={handleProjectCreator}>Project Creator Wizard</button>
           <hr />
           <button onClick={handleMyProjects}>My Projects</button>
-          <hr/>
+          <hr />
           <button onClick={handleTeam}>Teams</button>
-          <hr/>
+          <hr />
         </div>
       </div>
 
       {/* <div className="profile-card">
         {/* <p className="profile-name">{userName}</p> */}
-        {/* <button className="profile-btn" onClick={handleProfile}>Profile</button> */}
-        {/* <button className="logout-btn" onClick={handleLogout}>Logout</button> */}
-      {/* </div> */} 
+      {/* <button className="profile-btn" onClick={handleProfile}>Profile</button> */}
+      {/* <button className="logout-btn" onClick={handleLogout}>Logout</button> */}
+      {/* </div> */}
     </div>
   );
 }

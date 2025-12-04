@@ -12,7 +12,7 @@ const mailSender = async (email, subject, body) => {
     });
 
     let info = await transporter.sendMail({
-      from: `"Project Pilot" <${process.env.MAIL_ID}>`,
+      from: `"Electronics Projects Portal" <${process.env.MAIL_ID}>`,
       to: email,
       subject: subject,
       html: body,

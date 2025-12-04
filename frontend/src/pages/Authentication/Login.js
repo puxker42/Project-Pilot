@@ -8,17 +8,12 @@ const BASE_URL = process.env.REACT_APP_API_BASE_URL;
 function Login() {
   const [userID, setuserID] = useState('');
   const [password, setPassword] = useState('');
-  const [isRobot, setIsRobot] = useState(true);
+
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
-    if (!isRobot) {
-      alert('Please verify that you are not a robot');
-      return;
-    }
 
     setIsLoading(true);
 
@@ -71,7 +66,6 @@ function Login() {
   const handleReset = () => {
     setuserID('');
     setPassword('');
-    setIsRobot(false);
   };
 
   return (
@@ -149,21 +143,7 @@ function Login() {
             </div>
 
             {/* reCAPTCHA */}
-            {/* <div className="recaptcha-box">
-              <label className="checkbox-label">
-                <input
-                  type="checkbox"
-                  checked={isRobot}
-                  onChange={(e) => setIsRobot(e.target.checked)}
-                  className="checkbox-input"
-                />
-                <span>I'm not a robot</span>
-              </label>
-              <div className="recaptcha-info">
-                <div className="recaptcha-text">Verification</div>
-                <div className="recaptcha-subtext">Required</div>
-              </div>
-            </div> */}
+
 
             {/* Buttons */}
             <div className="button-container">
@@ -190,11 +170,6 @@ function Login() {
             </a>
           </form>
 
-          {/* Copyright */}
-          <footer className="login-footer">
-            © 2025 Walchand College of Engineering, Sangli. All rights reserved.<br />
-            Designed, Developed & Implemented by <strong>Pushkar Nashikkar</strong>
-          </footer>
         </div>
       </div>
     </div>

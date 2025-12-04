@@ -89,9 +89,7 @@ function Landing() {
           <input type='submit' value='Login' />
         </form>
       </div>
-      <footer className='footer'>
-        © 2025 Walchand College of Engineering, Sangli. All rights reserved.
-      </footer>
+
     </div>
   );
 }

@@ -230,7 +230,7 @@ exports.sendInstructioMail = async (req, res) => {
         // Build frontend reset URL
         const resetLink = `${process.env.FRONT_BASE}/auth/reset-password?token=${token}`;
 
-        const subject = 'Project Pilot - Password Reset Instructions';
+        const subject = 'Electronics Projects Portal - Password Reset Instructions';
         const body = `
       <p>Hello,</p>
       <p>We received a request to reset your password. Click the link below to proceed:</p>
@@ -238,7 +238,7 @@ exports.sendInstructioMail = async (req, res) => {
       <p><strong>Note: This link will expire in 2 minutes.</strong></p>
       <p>If you didn’t request this, simply ignore the message.</p>
       <br/>
-      <p>— Project Pilot Team</p>
+      <p>— Electronics Projects Portal Team</p>
     `;
 
         // Send the mail using your utility
@@ -350,7 +350,7 @@ exports.getCurrentUser = async (req, res) => {
             return res.status(404).json({ message: 'User not found' });
         }
 
-        res.status(200).json({ success: true, data: { ID: user.userID, name: `${user.firstName} ${user.lastName}`, batch: user.batch, passingYear: user.passingYear } });
+        res.status(200).json({ success: true, data: { ID: user.userID, name: `${user.firstName} ${user.lastName}`, batch: user.batch, passingYear: user.passingYear, year: user.year } });
     } catch (error) {
         console.error("getCurrentUser error:", error);
         res.status(500).json({ message: 'Internal server error' });

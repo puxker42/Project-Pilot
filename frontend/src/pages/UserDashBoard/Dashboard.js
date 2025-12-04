@@ -10,7 +10,7 @@ function Dashboard() {
   const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
   const [selectedComponents, setSelectedComponents] = useState(null);
-  const [uploadedFiles, setUploadedFiles] = useState({}); // Track file names
+
 
   useEffect(() => {
     const fetchProjects = async () => {
@@ -54,43 +54,7 @@ function Dashboard() {
       </span>
     ));
 
-  // === Handle file upload ===
-  const handleFileUpload = async (event, projectID) => {
-    const file = event.target.files[0];
-    if (file && file.type !== 'application/pdf') {
-      alert('Only PDF files are allowed!');
-      event.target.value = ''; // reset input
-      return;
-    }
 
-    if (file) {
-      setUploadedFiles(prev => ({ ...prev, [projectID]: file.name }));
-
-      try {
-        const token = localStorage.getItem('token');
-        const formData = new FormData();
-        formData.append('file', file); // backend expects "file"
-        formData.append('projectID', projectID);
-
-        const response = await fetch(`${BASE_URL}/upload-pdf`, {
-          method: 'POST',
-          headers: {
-            authorization: `Bearer ${token}`, // do NOT set Content-Type manually
-          },
-          body: formData,
-        });
-
-        if (!response.ok) throw new Error('Upload failed');
-        const result = await response.json();
-
-        console.log('Upload success:', result);
-        alert('File uploaded successfully!');
-      } catch (error) {
-        console.error('Upload error:', error);
-        alert('Failed to upload file.');
-      }
-    }
-  };
 
   return (
     <div className="dashboard">
@@ -107,7 +71,7 @@ function Dashboard() {
                 <th>Team Members</th>
                 <th>View Components</th>
                 <th>Guide Info</th>
-                <th>Upload File (PDF only)</th>
+
               </tr>
             </thead>
             <tbody>
@@ -134,19 +98,7 @@ function Dashboard() {
                         : 'Unknown'}
                     </div>
                   </td>
-                  <td>
-                    <label className="file-upload-wrapper">
-                      <span className="file-upload-icon">📎</span>
-                      <span className="file-name">
-                        {uploadedFiles[project.ID] || 'Upload PDF'}
-                      </span>
-                      <input
-                        type="file"
-                        accept="application/pdf"
-                        onChange={(e) => handleFileUpload(e, project.ID)}
-                      />
-                    </label>
-                  </td>
+
                 </tr>
               ))}
             </tbody>

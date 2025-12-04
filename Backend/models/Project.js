@@ -20,82 +20,82 @@ const prjSchema = new mongoose.Schema({
     },
     components: [
         {
-            id:{
-                type:String,
+            id: {
+                type: String,
                 // required:true
             },
-            name:{
-                type:String,
-                required:true
+            name: {
+                type: String,
+                required: true
             },
-            purpose:{
-                type:String,
-                trim:true
+            purpose: {
+                type: String,
+                trim: true
             },
-            quantity:{
-                type:Number,
-                required:true,
-                default:1
+            quantity: {
+                type: Number,
+                required: true,
+                default: 1
             },
-            accepted:{
-                type:Boolean,
-                required:true,
-                default:false
+            accepted: {
+                type: Boolean,
+                required: true,
+                default: false
             },
             //Talking about these two !
-            fullfilled:{
-                type:Boolean
+            fullfilled: {
+                type: Boolean
             },
-            receiveMemo:{
-                receivedQantity:{
-                    type:Number
+            receiveMemo: {
+                receivedQantity: {
+                    type: Number
                 },
-                remark:{
-                    type:String
+                remark: {
+                    type: String
                 }
             },
-            fullfilledQty:{
-                type:Number
+            fullfilledQty: {
+                type: Number
             },
-            allReceived:{
-                type:Boolean
+            allReceived: {
+                type: Boolean
             },
-            carts:[
+            carts: [
                 {
-                    cartID:{
-                        type:String
+                    cartID: {
+                        type: String
                     },
-                    fullfilledQty:{
+                    fullfilledQty: {
                         type: Number
                     }
 
                 }
             ],
-            returnMemo:{
-                returnQuantity:{
-                    type:Number
+            returnMemo: {
+                returnQuantity: {
+                    type: Number
                 },
-                remark:{
-                    type:Number
+                remark: {
+                    type: Number
                 }
             }
         }
     ],
     componentRejections: [
-    {
-        remark: {
-        type: String,
-        required: true
-        },
-        componentIds: [String],
-        date: {
-        type: Date,
-        default: Date.now
+        {
+            remark: {
+                type: String,
+                required: true
+            },
+            componentIds: [String],
+            date: {
+                type: Date,
+                default: Date.now
+            }
         }
-    }
     ],
-    rejectRemark:{
-        type:String
+    rejectRemark: {
+        type: String
     },
     isCompleted: {
         type: Boolean,
@@ -105,9 +105,9 @@ const prjSchema = new mongoose.Schema({
         type: Date,
         default: null
     },
-    teamID: 
+    teamID:
     {
-        type:mongoose.Schema.Types.ObjectId,
+        type: mongoose.Schema.Types.ObjectId,
         ref: "Team"
     },
     createdAt: {
@@ -119,12 +119,12 @@ const prjSchema = new mongoose.Schema({
         type: Boolean,
         default: false
     },
-    batch:{
-        type:Number
+    batch: {
+        type: Number
     },
-    appMan:{
-        type:Boolean,
-        default:false
+    appMan: {
+        type: Boolean,
+        default: false
     },
     status: {
         type: Number,
@@ -133,28 +133,52 @@ const prjSchema = new mongoose.Schema({
         required: true
     },
     guideID: {
-        type:mongoose.Schema.Types.ObjectId,
-        ref:'User'
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User'
     },
-    type:{
-        type:String,
-        required:true
+    type: {
+        type: String,
+        required: true
     },
-    slotAssigned:{
-        type:Boolean
+    slotAssigned: {
+        type: Boolean
     },
-    slot:{
-        slotn:{
-            type:Number
+    slot: {
+        slotn: {
+            type: Number
         },
-        date:{
-            type:Date
+        date: {
+            type: Date
         }
     },
-    ack:{
-        type:Number,
-        default:-1
-    }
+    ack: {
+        type: Number,
+        default: -1
+    },
+    reports: [
+        {
+            reportNumber: {
+                type: Number,
+                required: true
+            },
+            fileUrl: {
+                type: String,
+                required: true
+            },
+            status: {
+                type: String,
+                enum: ["Uploaded - Not Sent", "Pending Approval", "Approved", "Rejected"],
+                default: "Uploaded - Not Sent"
+            },
+            uploadedAt: {
+                type: Date,
+                default: Date.now
+            },
+            rejectionReason: {
+                type: String
+            }
+        }
+    ]
 });
 
 // Pre-save hook to manage completedAt based on isCompleted
