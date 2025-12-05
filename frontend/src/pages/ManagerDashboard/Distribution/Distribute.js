@@ -122,58 +122,75 @@ const Distribute = () => {
   };
 
   const submitAssign = async () => {
-    setAssignStatus('loading');
+    setAssignStatus("loading");
 
+    // 1️⃣ Build updated component list for the project
     const updatedComponentsList = assigningProject.components.map(c => {
       if (c.accepted && updatedComponents[c.name]) {
-        return { ...c, receiveMemo: { ...updatedComponents[c.name] } };
+        const issuedQty = Number(updatedComponents[c.name].receivedQantity) || 0;
+
+        return {
+          ...c,
+          fullfilledQty: issuedQty,                   // ✔ actual outgoing stock
+          fullfilled: issuedQty >= c.quantity        // ✔ requirement satisfied?
+        };
       }
       return c;
     });
 
-    const allAcceptedReceived = updatedComponentsList
+    // 2️⃣ Check if entire project is fully completed
+    const allAcceptedFullfilled = updatedComponentsList
       .filter(c => c.accepted)
-      .every(c => c.receiveMemo?.receivedQantity >= c.quantity);
+      .every(c => (c.fullfilledQty ?? 0) >= c.quantity);
 
-    const updatedProject = {
-      ...assigningProject,
-      components: updatedComponentsList,
-      allReceived: allAcceptedReceived
+
+    // 4️⃣ Build final object for backend
+    const payload = {
+      projectID: assigningProject._id,
+      updatedProject: {
+        ...assigningProject,
+        components: updatedComponentsList,
+        allFullfilled: allAcceptedFullfilled
+      }
     };
 
+    // 5️⃣ Send to backend
     try {
       const response = await fetch(`${BASE_URL}/check-in/verify`, {
-        method: 'PUT',
+        method: "PUT",
         headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${localStorage.getItem('token')}`
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${localStorage.getItem("token")}`
         },
-        body: JSON.stringify(updatedProject)
+        body: JSON.stringify(payload)
       });
 
       const result = await response.json();
+
       if (result.ackk === true) {
-        setAssignStatus('success');
+        setAssignStatus("success");
         setTimeout(() => {
           setAssigningProject(null);
           setUpdatedComponents({});
           fetchProjects();
         }, 1500);
       } else if (result.ackk === false) {
-        setAssignStatus('rejected');
+        setAssignStatus("rejected");
         setTimeout(() => {
           setAssigningProject(null);
           setUpdatedComponents({});
           fetchProjects();
         }, 2000);
       } else {
-        setAssignStatus('error');
+        setAssignStatus("error");
       }
+
     } catch (err) {
       console.error(err);
-      setAssignStatus('error');
+      setAssignStatus("error");
     }
   };
+
 
   const currentDate = new Date().toLocaleString('en-IN', {
     dateStyle: 'full',

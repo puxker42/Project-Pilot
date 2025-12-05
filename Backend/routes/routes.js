@@ -23,6 +23,7 @@ const { getControls, updateControls } = require('../controllers/Controls');
 
 const { addToSlot, getTokenProject, updateDelivery, checkInVerify } = require('../controllers/Distribution');
 const { uploadFile } = require('../controllers/FileHandler');
+const { getPendingComponents } = require('../controllers/PendingComponents');
 // --- Auth Routes ---
 router.post("/login", login);
 router.post("/signup", signUp);
@@ -42,6 +43,7 @@ router.delete("/delete-component/:cID", auth, authorizeRole("Admin", "Manager"),
 router.put("/update-component/:cID", auth, authorizeRole("Admin", "Manager"), updateComponent);
 router.put("/make-available/:cID", auth, makeAvailable);
 router.get("/get", getReqTable);
+router.get("/pending-components", auth, authorizeRole("Admin", "Manager", "Instructor"), getPendingComponents);
 
 // --- Team Routes ---
 router.post("/create-team", auth, createTeam);

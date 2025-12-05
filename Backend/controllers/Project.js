@@ -307,34 +307,86 @@ exports.updateProjectComponents = async (req, res) => {
   }
 };
 
-
 exports.projectReturn = async (req, res) => {
   try {
     const updatedProject = req.body;
-    const prjdoc = await Project.findById(updatedProject._id);
-    for (cmp of updatedProject.components) {
-      console.log(cmp);
-      const component = await Component.findOne({ cID: cmp.id });
-      console.log(component);
-      component.qnty += cmp.returnMemo.returnQuantity;
-      component.save();
+
+    if (!updatedProject || !updatedProject._id) {
+      return res.status(400).json({ message: "Invalid project data" });
     }
-    prjdoc.components = updatedProject.components;
-    prjdoc.isCompleted = true;
-    prjdoc.completedAt = new Date();
-    prjdoc.save();
+
+    // 1. Fetch the current state of the project from DB
+    const project = await Project.findById(updatedProject._id);
+    if (!project) {
+      return res.status(404).json({ message: "Project not found" });
+    }
+
+    // 2. Fetch all components to update inventory
+    const allComponents = await Component.find({});
+
+    let allComponentsReceived = true;
+
+    // 3. Iterate through updated components to process returns
+    for (const updatedComp of updatedProject.components) {
+      // Find the corresponding component in the DB project
+      const dbComp = project.components.find(c => c.id === updatedComp.id);
+
+      if (dbComp) {
+        // Check if there is a return quantity in the request
+        const returnQty = updatedComp.receiveMemo?.receivedQantity || 0;
+        const remark = updatedComp.receiveMemo?.remark || "";
+
+        if (returnQty > 0) {
+          // Update the DB component's return memo
+          dbComp.receiveMemo = {
+            receivedQuantity: returnQty,
+            remark: remark
+          };
+
+          // Update Inventory
+          const inventoryComp = allComponents.find(c => c.cID === updatedComp.id);
+          if (inventoryComp) {
+            inventoryComp.qnty = (inventoryComp.qnty || 0) + returnQty;
+            inventoryComp.issued = Math.max(0, (inventoryComp.issued || 0) - returnQty);
+            await inventoryComp.save();
+          }
+        }
+
+        // Update allReceived status from frontend logic
+        dbComp.allReceived = updatedComp.allReceived;
+
+        // Check if this component is fully returned/received
+        if (!dbComp.allReceived) {
+          allComponentsReceived = false;
+        }
+      }
+    }
+
+    // 4. Update Project Status if all components are returned
+    if (allComponentsReceived) {
+      project.status = 6; // Project Completed
+      project.isCompleted = true;
+      project.completedAt = new Date();
+    }
+
+    // 5. Save the updated project
+    await project.save();
+
     return res.status(200).json({
       success: true,
-      message: "Projects Updated Successfully !"
-    })
+      message: "Project return processed successfully!",
+      project: project
+    });
+
   } catch (error) {
     console.error("Project return failed:", error);
     return res.status(500).json({
       success: false,
       message: "Server error while processing return",
+      error: error.message
     });
   }
-}
+};
 
 exports.getGuidedProjects = async (req, res) => {
   try {

@@ -102,6 +102,7 @@ function TopBarWithLogo({ title }) {
   const navigate = useNavigate();
 
   const sidebarActions = [
+    { name: 'Dashboard', path: '/student-dashboard' },
     { name: 'Team Creator Wizard', path: '/create-team' },
     { name: 'Project Creator Wizard', path: '/create-project?new=true' },
     { name: 'My Projects', path: '/my-projects' },
@@ -261,7 +262,7 @@ function TopBarWithLogo({ title }) {
           </List>
 
           <Divider />
-          
+
           <List sx={{ p: 1 }}>
             <ListItem disablePadding>
               <ListItemButton

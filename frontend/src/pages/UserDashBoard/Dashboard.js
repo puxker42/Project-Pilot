@@ -1,148 +1,113 @@
 import React, { useEffect, useState } from 'react';
 import './Dashboard.css';
-import NoDataFound from '../../components/NoDataFound'; // Adjust the path based on your project structure
+import NoDataFound from '../../components/NoDataFound';
+import { FaUsers, FaChalkboardTeacher, FaBoxOpen, FaProjectDiagram } from 'react-icons/fa';
 
 const BASE_URL = process.env.REACT_APP_API_BASE_URL;
-const ITEMS_PER_PAGE = 3;
 
-function Dashboard() {
-  const [projects, setProjects] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [currentPage, setCurrentPage] = useState(1);
+function Dashboard({ projects = [], loading = false }) {
   const [selectedComponents, setSelectedComponents] = useState(null);
 
-
-  useEffect(() => {
-    const fetchProjects = async () => {
-      try {
-        const token = localStorage.getItem('token');
-        const response = await fetch(`${BASE_URL}/projects-me`, {
-          method: 'GET',
-          headers: {
-            'Content-Type': 'application/json',
-            authorization: `Bearer ${token}`,
-          },
-        });
-
-        if (!response.ok) throw new Error('Failed to fetch projects');
-
-        const data = await response.json();
-        const incompleteProjects = data.filter(project => !project.isCompleted);
-        setProjects(incompleteProjects);
-      } catch (error) {
-        console.error('Error fetching projects:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchProjects();
-  }, []);
-
-  const totalPages = Math.ceil(projects.length / ITEMS_PER_PAGE);
-  const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
-  const currentProjects = projects.slice(startIndex, startIndex + ITEMS_PER_PAGE);
-
-  const handlePrev = () => currentPage > 1 && setCurrentPage(currentPage - 1);
-  const handleNext = () => currentPage < totalPages && setCurrentPage(currentPage + 1);
-
-  const renderTeamMembers = (members) =>
-    members.map((m, i) => (
-      <span key={i}>
-        {m.userID}
-        {i < members.length - 1 && ', '}
-      </span>
-    ));
-
-
+  const renderTeamMembers = (members) => {
+    if (!members || members.length === 0) return 'No members';
+    return members.map(m => m.userID).join(', ');
+  };
 
   return (
-    <div className="dashboard">
+    <div className="dashboard-container-student">
       {loading ? (
-        <p>Loading...</p>
+        <div className="loading-spinner">Loading projects...</div>
       ) : projects.length === 0 ? (
         <NoDataFound message="You have no ongoing/incomplete projects." />
       ) : (
-        <>
-          <table className="project-table">
-            <thead>
-              <tr>
-                <th>Project ID / Name</th>
-                <th>Team Members</th>
-                <th>View Components</th>
-                <th>Guide Info</th>
+        <div className="projects-grid">
+          {projects.map((project, index) => (
+            <div key={project.ID || index} className="project-card">
+              <div className="project-header">
+                <div className="project-icon">
+                  <FaProjectDiagram />
+                </div>
+                <div className="project-title-section">
+                  <span className="project-id">#{project.ID}</span>
+                  <h3 className="project-title">{project.title}</h3>
+                </div>
+              </div>
 
-              </tr>
-            </thead>
-            <tbody>
-              {currentProjects.map((project, index) => (
-                <tr key={project.ID || index}>
-                  <td>
-                    <strong>{project.ID}</strong><br />
-                    {project.title}
-                  </td>
-                  <td>{renderTeamMembers(project?.team?.members || [])}</td>
-                  <td>
-                    <a
-                      className="view-link"
-                      onClick={() => setSelectedComponents(project.components)}
-                    >
-                      View Components ({project.components?.length || 0})
-                    </a>
-                  </td>
-                  <td>
-                    <div>{project?.projectGuide?.userID || 'N/A'}</div>
-                    <div>
+              <div className="project-details">
+                <div className="detail-row">
+                  <FaUsers className="detail-icon" />
+                  <div className="detail-content">
+                    <label>Team Members</label>
+                    <p>{renderTeamMembers(project?.team?.members)}</p>
+                  </div>
+                </div>
+
+                <div className="detail-row">
+                  <FaChalkboardTeacher className="detail-icon" />
+                  <div className="detail-content">
+                    <label>Guide</label>
+                    <p>
                       {project?.projectGuide?.firstName && project?.projectGuide?.lastName
                         ? `${project.projectGuide.firstName} ${project.projectGuide.lastName}`
-                        : 'Unknown'}
-                    </div>
-                  </td>
+                        : project?.projectGuide?.userID || 'N/A'}
+                    </p>
+                  </div>
+                </div>
+              </div>
 
-                </tr>
-              ))}
-            </tbody>
-          </table>
-
-          {totalPages > 1 && (
-            <div className="pagination-controls">
-              <button onClick={handlePrev} disabled={currentPage === 1}>{'<'}</button>
-              <span>{currentPage} / {totalPages}</span>
-              <button onClick={handleNext} disabled={currentPage === totalPages}>{'>'}</button>
+              <div className="project-actions">
+                <button
+                  className="view-components-btn"
+                  onClick={() => setSelectedComponents(project.components)}
+                >
+                  <FaBoxOpen /> View Components ({project.components?.length || 0})
+                </button>
+              </div>
             </div>
-          )}
-        </>
+          ))}
+        </div>
       )}
 
       {selectedComponents && (
         <div className="modal-overlay" onClick={() => setSelectedComponents(null)}>
           <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-            <h3>Components</h3>
-            <table className="component-table">
-              <thead>
-                <tr>
-                  <th>ID</th>
-                  <th>Name</th>
-                  <th>Purpose</th>
-                  <th>Qty</th>
-                  <th>Accepted</th>
-                  <th>Fullfilled</th>
-                </tr>
-              </thead>
-              <tbody>
-                {selectedComponents.map((comp, idx) => (
-                  <tr key={idx}>
-                    <td>{comp.id}</td>
-                    <td>{comp.name}</td>
-                    <td>{comp.purpose}</td>
-                    <td>{comp.quantity}</td>
-                    <td>{comp.accepted ? 'Yes' : 'No'}</td>
-                    <td>{comp.fullfilledQty}</td>
+            <div className="modal-header">
+              <h3>Project Components</h3>
+              <button className="close-btn-icon" onClick={() => setSelectedComponents(null)}>&times;</button>
+            </div>
+            <div className="table-responsive">
+              <table className="component-table">
+                <thead>
+                  <tr>
+                    <th>ID</th>
+                    <th>Name</th>
+                    <th>Purpose</th>
+                    <th>Qty</th>
+                    <th>Status</th>
+                    <th>Fulfilled</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-            <button className="close-btn" onClick={() => setSelectedComponents(null)}>Close</button>
+                </thead>
+                <tbody>
+                  {selectedComponents.map((comp, idx) => (
+                    <tr key={idx}>
+                      <td>{comp.id}</td>
+                      <td>{comp.name}</td>
+                      <td>{comp.purpose}</td>
+                      <td>{comp.quantity}</td>
+                      <td>
+                        <span className={`status-badge ${comp.accepted ? 'accepted' : 'pending'}`}>
+                          {comp.accepted ? 'Accepted' : 'Pending'}
+                        </span>
+                      </td>
+                      <td>{comp.fullfilledQty}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+            <div className="modal-footer">
+              <button className="close-btn" onClick={() => setSelectedComponents(null)}>Close</button>
+            </div>
           </div>
         </div>
       )}

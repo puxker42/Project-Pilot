@@ -70,15 +70,7 @@ const prjSchema = new mongoose.Schema({
                     }
 
                 }
-            ],
-            returnMemo: {
-                returnQuantity: {
-                    type: Number
-                },
-                remark: {
-                    type: Number
-                }
-            }
+            ]
         }
     ],
     componentRejections: [

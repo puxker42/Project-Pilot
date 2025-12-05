@@ -3,7 +3,8 @@ import axios from "axios";
 import "./Inventory.css";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
-import TopBarWithLogo from "../TopBarWithLogo";
+import ManagerTopBar from "../TopBarWithLogo";
+import InstructorTopBar from "../../InstructorDashBoard/TopBarWithLogo";
 import NoDataFound from "../../../components/NoDataFound"; // Adjust the path if needed
 
 const BASE_URL = process.env.REACT_APP_API_BASE_URL;
@@ -12,8 +13,14 @@ export default function Inventory() {
   const [components, setComponents] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [filter, setFilter] = useState("all");
+  const [role, setRole] = useState('');
 
   useEffect(() => {
+    const userStr = localStorage.getItem('user');
+    if (userStr) {
+      const user = JSON.parse(userStr);
+      setRole(user.role);
+    }
     const token = localStorage.getItem("token");
 
     axios
@@ -79,9 +86,11 @@ export default function Inventory() {
     doc.save("Inventory_Report.pdf");
   };
 
+  const TopBar = role === 'Manager' ? ManagerTopBar : InstructorTopBar;
+
   return (
     <div>
-      <TopBarWithLogo title="Component Inventory" />
+      <TopBar title="Component Inventory" />
       <div className="inventory-container">
         <h2>Component Inventory</h2>
 

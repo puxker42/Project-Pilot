@@ -93,9 +93,11 @@ function TopBarWithLogo({ title }) {
   const navigate = useNavigate();
 
   const sidebarActions = [
+    { name: 'Dashboard', path: '/instructor-dashboard' },
     { name: 'Projects To Approve', path: '/projects-to-approve' },
     { name: 'Guided Projects', path: '/projects-under-me' },
-    { name: 'Component Info', path: '/search-components'}
+    { name: 'Component Info', path: '/search-components' },
+    { name: 'Pend Comp. List', path: '/pending-components' }
   ];
 
   const handleLogout = () => {

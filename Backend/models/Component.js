@@ -18,6 +18,10 @@ const comSchema = new mongoose.Schema({
     required: true,
     default: 0
   },
+  issued: {
+    type: Number,
+    default: 0
+  },
   price: {
     type: String
     // required: true
@@ -25,7 +29,7 @@ const comSchema = new mongoose.Schema({
   },
   minPurchace: {
     type: Number,
-    default:1
+    default: 1
   },
   loc: {
     type: String

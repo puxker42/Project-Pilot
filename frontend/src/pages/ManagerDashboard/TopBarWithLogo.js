@@ -86,32 +86,26 @@ async function getUserData() {
   }
 }
 
-function TopBarWithLogo({title = 'Department of Electronics Engineering    |     Projects Management System' }) {
+function TopBarWithLogo({ title = 'Department of Electronics Engineering    |     Projects Management System' }) {
   const [userName, setUserName] = useState('');
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [anchorEl, setAnchorEl] = useState(null);
   const navigate = useNavigate();
-const sidebarActions = [
 
+  const sidebarActions = [
+    { name: 'Dashboard', path: '/manager-dashboard' },
     { name: 'Projects', path: '/all-projects' },
-
     { name: 'Create Cart', path: '/get-order' },
-
     { name: 'Component Info', path: '/search-components' },
-
     { name: 'View Carts', path: '/view-carts', triggerGenerate: true },
-
-    { name: 'Create Component', path: '/create-component'},
-
-    { name: 'Assign Slots', path:'/assign-slot'},
-
-    { name: 'Distribute Components', path:'/check-out'},
-
-    { name: 'Check-In', path:'/check-in'},
-
-    { name: 'View Requirements', path:'/view-requirements/fetch'}
-
+    { name: 'Create Component', path: '/create-component' },
+    { name: 'Assign Slots', path: '/assign-slot' },
+    { name: 'Distribute Components', path: '/check-out' },
+    { name: 'Check-In', path: '/check-in' },
+    { name: 'View Requirements', path: '/view-requirements/fetch' },
+    { name: 'Pend Comp. List', path: '/pending-components' }
   ];
+
   const handleLogout = () => {
     localStorage.removeItem('token');
     navigate('/');

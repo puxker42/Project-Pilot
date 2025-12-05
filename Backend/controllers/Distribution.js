@@ -90,22 +90,49 @@ const jwt = require('jsonwebtoken');
 exports.checkInVerify = async (req, res) => {
   console.log("Inside CheckInVerify");
   try {
-    const updatedProject = req.body;
+    // Accept either { updatedProject } or the project directly
+    const body = req.body || {};
+    const updatedProject = body.updatedProject || body;
 
-    if (!updatedProject) {
+    if (!updatedProject || !updatedProject._id) {
+      console.warn("Bad request body for checkInVerify:", body);
       return res.status(400).json({
-        message: 'updatedProject with valid teamID, _id, and team members is required.',
+        message: 'updatedProject with valid _id is required in request body. Accepts either { updatedProject: {...} } or the project object directly.'
       });
     }
 
-    const team = updatedProject.teamID;
+    // teamID might be an ObjectId/string or a populated object with members
+    let teamDoc = null;
+    const teamRef = updatedProject.teamID;
 
-    const leadMember = team.members.find((member) => member.role === 'Lead');
+    if (!teamRef) {
+      return res.status(400).json({ message: 'Team ID missing from updatedProject.teamID' });
+    }
+
+    // If teamRef looks like a populated object with members, use it directly
+    if (typeof teamRef === 'object' && teamRef.members && Array.isArray(teamRef.members)) {
+      teamDoc = teamRef;
+    } else {
+      // Otherwise teamRef is likely an ObjectId/string, fetch team doc
+      try {
+        teamDoc = await Team.findById(teamRef).lean();
+      } catch (err) {
+        console.warn("Error fetching Team by ID:", teamRef, err);
+        teamDoc = null;
+      }
+    }
+
+    if (!teamDoc || !Array.isArray(teamDoc.members)) {
+      console.warn("Team not found or has no members. teamRef:", teamRef, "teamDoc:", teamDoc);
+      return res.status(404).json({ message: 'Team not found or team has no members.' });
+    }
+
+    const leadMember = teamDoc.members.find((member) => member.role === 'Lead');
     if (!leadMember || !leadMember.userID) {
       return res.status(404).json({ message: 'No team lead found in the team.' });
     }
 
-    const leadUser = await User.findOne({ userID: leadMember.userID });
+    const leadUser = await User.findOne({ userID: leadMember.userID }).lean();
     if (!leadUser) {
       console.warn(`Team lead user with userID ${leadMember.userID} not found.`);
       return res.status(404).json({ message: 'Team lead user not found.' });
@@ -122,7 +149,7 @@ exports.checkInVerify = async (req, res) => {
     const acknowledgementURL = `${FRONT_BASE}/student/acknowledgement/${updatedProject._id}/${token}`;
 
     const subject = 'Acknowledge Your Component Collection Slot';
-    const body = `
+    const bodyHtml = `
       <p>Dear ${leadUser.firstName},</p>
       <p>This is a reminder to acknowledge your component collection slot for the project 
          <strong>${updatedProject.title}</strong> (ID: ${updatedProject.ID}).</p>
@@ -134,16 +161,16 @@ exports.checkInVerify = async (req, res) => {
       <p>Regards,<br/>Project Management Team</p>
     `;
 
-    await sendMail(leadUser.email, subject, body);
-    console.log("📧 Mail sent to lead. Waiting for acknowledgement...");
+    await sendMail(leadUser.email, subject, bodyHtml);
+    console.log("📧 Mail sent to lead:", leadUser.email);
 
-    // 🔁 Polling loop: Wait for .ack to become true
+    // Polling for ack (existing logic)
     const maxWaitTime = 20 * 60 * 1000; // 20 minutes
     const pollInterval = 5000; // 5 seconds
     const start = Date.now();
 
     while (Date.now() - start < maxWaitTime) {
-      const latestProject = await Project.findById(updatedProject._id);
+      const latestProject = await Project.findById(updatedProject._id).lean();
       console.log("🔄 Polling... current ack =", latestProject?.ack);
 
       if (latestProject?.ack === 1) {
@@ -165,7 +192,7 @@ exports.checkInVerify = async (req, res) => {
       await new Promise(resolve => setTimeout(resolve, pollInterval));
     }
 
-    // ⏰ Timeout
+    // Timeout
     return res.status(408).json({
       success: false,
       message: 'Timed out waiting for acknowledgement. Please try again.',
@@ -176,7 +203,6 @@ exports.checkInVerify = async (req, res) => {
     return res.status(500).json({ message: 'Internal server error.' });
   }
 };
-
 
 exports.getTokenProject = async (req, res) => {
   try {
@@ -259,13 +285,14 @@ exports.updateDelivery = async (req, res) => {
     const allComponents = await Component.find({});
     for (const projComp of updatedProject.components || []) {
       const comID = projComp.id;
-      const receivedQty = projComp.receiveMemo?.receivedQantity || 0;
+      const receivedQty = projComp.fullfilledQty || 0;
 
       if (!comID || receivedQty <= 0) continue;
 
       const inventoryComp = allComponents.find(comp => comp.cID === comID);
       if (inventoryComp) {
         inventoryComp.qnty = Math.max(0, inventoryComp.qnty - receivedQty);
+        inventoryComp.issued = (inventoryComp.issued || 0) + receivedQty;
         await inventoryComp.save();
       }
     }

@@ -96,20 +96,29 @@ export default function ProjectCheckIn() {
 
   const handleCheckIn = async () => {
     if (!selectedProject) return;
+
     setLoading(true);
+
     try {
       const updatedProject = JSON.parse(JSON.stringify(selectedProject));
+
       updatedProject.components = updatedProject.components.map((comp, idx) => {
         const row = rowState[idx];
+
         if (row.returnQty > 0) {
-          comp.returnMemo = {
-            returnQuantity: row.returnQty,
+          const issuedQty = comp.fullfilledQty ?? 0;
+
+          comp.receiveMemo = {
+            receivedQantity: row.returnQty,
             remark: row.remark,
           };
+
+          comp.allReceived = row.returnQty >= issuedQty;
         }
+
         return comp;
       });
-
+      console.log(updatedProject);
       const res = await fetch(`${BASE_URL}/check-in/project`, {
         method: "PUT",
         headers: {
@@ -124,13 +133,17 @@ export default function ProjectCheckIn() {
 
       alert("Check-in successful!");
       setModalOpen(false);
-      setProjects((prev) => prev.map((p) => (p._id === updatedProject._id ? updatedProject : p)));
+      setProjects((prev) =>
+        prev.map((p) => (p._id === updatedProject._id ? updatedProject : p))
+      );
+
     } catch (err) {
       alert(err.message);
     } finally {
       setLoading(false);
     }
   };
+
 
   return (
     <div>
@@ -192,7 +205,7 @@ export default function ProjectCheckIn() {
                 </thead>
                 <tbody>
                   {selectedProject.components.map((comp, idx) => {
-                    const received = comp.receiveMemo?.receivedQantity ?? 0;
+                    const received = comp.fullfilledQty ?? 0;
                     const row = rowState[idx] || { returnQty: 0, remark: "" };
                     return (
                       <tr key={comp.id}>
