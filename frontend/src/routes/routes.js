@@ -39,6 +39,7 @@ import ForgotPassword from '../pages/Authentication/ForgotPassword';
 import ResetPassword from '../pages/Authentication/ResetPassword';
 import Requirement from '../pages/ManagerDashboard/Requirements';
 import PendingComponentsPage from '../pages/PendingComponentsPage';
+import GenerateReports from '../pages/ManagerDashboard/Reports/GenerateReports';
 const AppRoutes = () => (
   <Routes>
     {/* Public Routes */}
@@ -85,6 +86,7 @@ const AppRoutes = () => (
     <Route path='/my-teams' element={<PrivateRoutes><MyTeams /></PrivateRoutes>} />
     <Route path='/view-requirements/fetch' element={<PrivateRoutes><Requirement /></PrivateRoutes>} />
     <Route path='/pending-components' element={<PrivateRoutes><PendingComponentsPage /></PrivateRoutes>} />
+    <Route path='/generate-reports' element={<PrivateRoutes><GenerateReports /></PrivateRoutes>} />
     <Route path="*" element={<PageNotFound />} />
   </Routes>
 );

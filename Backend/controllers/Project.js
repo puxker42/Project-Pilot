@@ -5,7 +5,8 @@ const Component = require("../models/Component");
 const Team = require("../models/Team");
 const { getMidOrder } = require("./Components");
 const ReqTable = require('../models/ReqTable');
-
+const StockLog = require('../models/StockLog');
+const ProjectLog = require('../models/ProjectLog');
 exports.createProject = async (req, res) => {
   try {
     const { ID, type, title, description, components, teamID, guideID } = req.body;
@@ -99,6 +100,16 @@ exports.createProject = async (req, res) => {
     guideDoc.projects.push(savedProject._id);
     await guideDoc.save();
 
+    // Log Project Creation
+    const log = new ProjectLog({
+      projectID: savedProject.ID,
+      action: 'CREATED',
+      message: `Project ${savedProject.title} created.`,
+      actor: 'System',
+      remark: 'Project Initialization'
+    });
+    await log.save();
+
 
     return res.status(201).json({
       message: "Project created successfully.",
@@ -179,22 +190,77 @@ exports.getUserProjects = async (req, res) => {
       .populate('teamID')
 
 
-    console.log(projects);
-    console.log("--------------------------------------------");
+    // Collect all student user IDs from all projects' teams
+    const allStudentUserIDs = new Set();
+    projects.forEach(p => {
+      if (p.teamID && p.teamID.members) {
+        p.teamID.members.forEach(m => {
+          console.log(`Project ${p.ID} Member ID:`, m.userID, typeof m.userID);
+          allStudentUserIDs.add(Number(m.userID))
+        });
+      }
+    });
+
+    console.log("All Student IDs:", Array.from(allStudentUserIDs));
+
+    // Fetch User documents for these IDs
+    const studentUsers = await User.find({ userID: { $in: Array.from(allStudentUserIDs) } })
+      .select('firstName lastName userID email image contactNumber'); // Select necessary fields
+
+    console.log("Fetched Student Users:", studentUsers.length);
+
+    // Create a map for quick lookup: userID -> User Object
+    const studentMap = {};
+    studentUsers.forEach(u => {
+      console.log(`Mapping User: ${u.userID} -> ${u.firstName}`);
+      studentMap[Number(u.userID)] = u;
+    });
+
+    // console.log(projects);
+    // console.log("--------------------------------------------");
     // Format the project data
-    const formattedProjects = projects.map(p => ({
-      title: p.title,
-      ID: p.ID,
-      description: p.description,
-      components: p.components,
-      team: p.teamID,
-      status: p.status,
-      isApproved: p.approved,
-      // members:p.teamI
-      projectGuide: p.guideID,
-      createdAt: p.createdAt,
-      reports: p.reports || []
-    }));
+    const formattedProjects = projects.map(p => {
+      // Enrich team members with user details
+      let enrichedTeam = p.teamID;
+      if (enrichedTeam && enrichedTeam.members) {
+        // We need to convert the mongoose document to a plain object to modify it freely, 
+        // or just construct a new members array. 
+        // derived members list
+        const enrichedMembers = enrichedTeam.members.map(member => {
+          const userDetails = studentMap[Number(member.userID)];
+          if (!userDetails) console.log(`Missing details for member ${member.userID} in project ${p.ID}`);
+          return {
+            userID: member.userID,
+            role: member.role,
+            firstName: userDetails ? userDetails.firstName : '',
+            lastName: userDetails ? userDetails.lastName : '',
+            email: userDetails ? userDetails.email : '',
+            image: userDetails ? userDetails.image : '',
+            contactNumber: userDetails ? userDetails.contactNumber : '',
+          };
+        });
+
+        // Spread to avoid mutating the original mongoose doc directly in a way that might be restricted
+        enrichedTeam = {
+          ...enrichedTeam.toObject(),
+          members: enrichedMembers
+        };
+      }
+
+      return {
+        title: p.title,
+        ID: p.ID,
+        description: p.description,
+        components: p.components,
+        team: enrichedTeam, // Use the enriched team object
+        status: p.status,
+        isApproved: p.approved,
+        // members:p.teamI
+        projectGuide: p.guideID,
+        createdAt: p.createdAt,
+        reports: p.reports || []
+      }
+    });
     console.log(formattedProjects);
     res.status(200).json(formattedProjects);
   } catch (error) {
@@ -233,6 +299,16 @@ exports.updateProjectApproval = async (req, res) => {
     }
     // console.log("After:", project.status);
     await project.save();
+
+    // Log Approval Change
+    const log = new ProjectLog({
+      projectID: project.ID,
+      action: approved ? 'APPROVED' : 'APPROVAL_REVOKED',
+      message: `Project approval status changed to ${approved}`,
+      actor: req.user ? req.user.userId : 'System',
+      remark: `Status: ${project.status}`
+    });
+    await log.save();
 
 
     return res.status(200).json({ message: 'Project approval status updated', project });
@@ -300,6 +376,16 @@ exports.updateProjectComponents = async (req, res) => {
     // Regenerate MidOrder from updated project data
     getMidOrder();
 
+    // Log Component Update
+    const log = new ProjectLog({
+      projectID: project.ID,
+      action: 'COMPONENT_UPDATE',
+      message: `Components updated. Accepted: ${acceptedCount}/${total}`,
+      actor: req.user ? req.user.userId : 'System',
+      remark: remark || 'No remark'
+    });
+    await log.save();
+
     return res.status(200).json({ success: true, message: "Project components updated." });
   } catch (err) {
     console.error(err);
@@ -348,6 +434,16 @@ exports.projectReturn = async (req, res) => {
           if (inventoryComp) {
             inventoryComp.qnty = (inventoryComp.qnty || 0) + returnQty;
             inventoryComp.issued = Math.max(0, (inventoryComp.issued || 0) - returnQty);
+            //Stock Log
+            const stockLog = new StockLog({
+              componentID: updatedComp.id,
+              source: project.ID,
+              destination: 'Stock',
+              type: 'IN',
+              quantity: returnQty,
+              remark: `Component ${updatedComp.id} checked in from project ${project._id}`
+            });
+            await stockLog.save();
             await inventoryComp.save();
           }
         }
@@ -371,6 +467,16 @@ exports.projectReturn = async (req, res) => {
 
     // 5. Save the updated project
     await project.save();
+
+    // Log Return
+    const log = new ProjectLog({
+      projectID: project.ID,
+      action: 'PROJECT_RETURN',
+      message: 'Project return processed',
+      actor: req.user ? req.user.userId : 'System',
+      remark: 'Components returned to stock'
+    });
+    await log.save();
 
     return res.status(200).json({
       success: true,
@@ -444,6 +550,16 @@ exports.uploadReport = async (req, res) => {
 
     await project.save();
 
+    // Log Report Upload
+    const log = new ProjectLog({
+      projectID: project.ID,
+      action: 'REPORT_UPLOAD',
+      message: `Report ${reportNumber} uploaded`,
+      actor: req.user ? req.user.userId : 'System',
+      remark: fileUrl
+    });
+    await log.save();
+
     return res.status(200).json({
       success: true,
       message: "Report uploaded successfully.",
@@ -478,6 +594,16 @@ exports.sendReportForApproval = async (req, res) => {
 
     report.status = "Pending Approval";
     await project.save();
+
+    // Log Report Submission
+    const log = new ProjectLog({
+      projectID: project.ID,
+      action: 'REPORT_SUBMIT',
+      message: `Report ${reportNumber} sent for approval`,
+      actor: req.user ? req.user.userId : 'System',
+      remark: 'Pending Approval'
+    });
+    await log.save();
 
     return res.status(200).json({
       success: true,
@@ -521,6 +647,16 @@ exports.updateReportStatus = async (req, res) => {
     }
 
     await project.save();
+
+    // Log Report Status Change
+    const log = new ProjectLog({
+      projectID: project.ID,
+      action: status === 'Approved' ? 'REPORT_APPROVED' : 'REPORT_REJECTED',
+      message: `Report ${reportNumber} ${status}`,
+      actor: req.user ? req.user.userId : 'System',
+      remark: status === 'Rejected' ? remark : 'Approved'
+    });
+    await log.save();
 
     return res.status(200).json({
       success: true,

@@ -3,7 +3,7 @@ import './ManagerDashboard.css';
 import { useNavigate } from 'react-router-dom';
 import TopBarWithLogo from './TopBarWithLogo';
 import Footer from '../../components/Footer';
-import { FaProjectDiagram, FaShoppingCart, FaSearch, FaClipboardList, FaPlusSquare, FaCalendarCheck, FaTruck, FaWarehouse, FaTasks } from 'react-icons/fa';
+import { FaProjectDiagram, FaShoppingCart, FaSearch, FaClipboardList, FaPlusSquare, FaCalendarCheck, FaTruck, FaWarehouse, FaTasks, FaFileAlt } from 'react-icons/fa';
 import axios from 'axios';
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
@@ -71,6 +71,7 @@ const ManagerDashboard = () => {
     { name: 'Create Component', path: '/create-component', icon: <FaPlusSquare />, color: '#e74a3b' },
     { name: 'Assign Slots', path: '/assign-slot', icon: <FaCalendarCheck />, color: '#858796' },
     { name: 'Distribute Components', path: '/check-out', icon: <FaTruck />, color: '#5a5c69' },
+    { name: 'Generate Reports', path: '/generate-reports', icon: <FaFileAlt />, color: '#fd7e14' },
     { name: 'Check-In', path: '/check-in', icon: <FaWarehouse />, color: '#2e59d9' }
   ];
 

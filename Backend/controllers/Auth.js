@@ -372,3 +372,61 @@ exports.verifyToken = (req, res) => {
         res.status(401).json({ valid: false, message: 'Invalid or expired token' });
     }
 };
+
+exports.createInstructor = async (req, res) => {
+    try {
+        const { firstName, lastName, email, password, cPassword, contactNumber, userID } = req.body;
+
+        if (!firstName || !lastName || !email || !password || !cPassword || !contactNumber || !userID) {
+            return res.status(400).json({ success: false, message: "All fields are required!" });
+        }
+
+        if (password !== cPassword) {
+            return res.status(400).json({ success: false, message: "Passwords do not match!" });
+        }
+
+        const exist = await User.findOne({ userID: Number(userID) });
+        if (exist) {
+            return res.status(409).json({ success: false, message: "User ID already taken!" });
+        }
+
+        const emailExist = await User.findOne({ email });
+        if (emailExist) {
+            return res.status(409).json({ success: false, message: "Email already exists!" });
+        }
+
+        const hashedPassword = await bcrypt.hash(password, 10);
+
+        const profile = await Profile.create({
+            gender: null,
+            about: null,
+            dateOfBirth: null,
+            contactNo: null,
+        });
+
+        const userData = {
+            firstName,
+            lastName,
+            email,
+            userID: Number(userID),
+            password: hashedPassword,
+            accountType: "Instructor",
+            isVerified: true,
+            contactNumber,
+            additionalDetail: profile._id,
+            image: `https://api.dicebear.com/5.x/initials/svg?seed=${firstName} ${lastName}`,
+        };
+
+        const user = await User.create(userData);
+
+        return res.status(200).json({
+            success: true,
+            message: "Instructor created successfully!",
+            user,
+        });
+
+    } catch (err) {
+        console.error("Error creating instructor:", err);
+        return res.status(500).json({ success: false, message: "Internal server error!" });
+    }
+};

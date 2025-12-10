@@ -59,7 +59,7 @@ const VerifyDelivery = () => {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${token}`, // 🔄 Send token from URL param
       },
-      body: JSON.stringify({ updatedProject: project, denied:false }),
+      body: JSON.stringify({ updatedProject: project, denied: false }),
     })
       .then(res => {
         if (!res.ok) throw new Error('Failed to submit acknowledgement.');
@@ -76,7 +76,7 @@ const VerifyDelivery = () => {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${token}`,
       },
-      body: JSON.stringify({ updatedProject: project, denied:true }),
+      body: JSON.stringify({ updatedProject: project, denied: true }),
     })
       .then(res => {
         if (!res.ok) throw new Error('Failed to submit denial.');
@@ -124,7 +124,7 @@ const VerifyDelivery = () => {
         <tbody>
           {project.components?.map((comp, index) => (
             <tr key={index}>
-              <td>{comp.comID}</td>
+              <td>{comp.id}</td>
               <td>{comp.name}</td>
               <td>{comp.receivedQty}</td>
               <td>{comp.remark || '-'}</td>

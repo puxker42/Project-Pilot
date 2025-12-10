@@ -68,37 +68,37 @@ function StudentDashboard() {
     <div className="student-dashboard-container">
       <TopBarWithLogo title="Student Dashboard" />
 
-      <div className="dashboard-content">
+      <div className="student-dashboard-content">
         {/* Welcome Section */}
-        <div className="welcome-section">
-          <div className="welcome-text">
+        <div className="student-welcome-section">
+          <div className="student-welcome-text">
             <h1>{getGreeting()}, {user.name.split(' ')[0]}! 👋</h1>
             <p>Here's what's happening with your projects today.</p>
           </div>
-          <div className="date-badge">
+          <div className="student-date-badge">
             {new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}
           </div>
         </div>
 
         {/* Stats Row */}
-        <div className="stats-grid">
-          <div className="stat-card total">
-            <div className="stat-icon"><FaProjectDiagram /></div>
-            <div className="stat-info">
+        <div className="student-stats-grid">
+          <div className="student-stat-card total">
+            <div className="student-stat-icon"><FaProjectDiagram /></div>
+            <div className="student-stat-info">
               <h3>{totalProjects}</h3>
               <p>Total Projects</p>
             </div>
           </div>
-          <div className="stat-card active">
-            <div className="stat-icon"><FaHourglassHalf /></div>
-            <div className="stat-info">
+          <div className="student-stat-card active">
+            <div className="student-stat-icon"><FaHourglassHalf /></div>
+            <div className="student-stat-info">
               <h3>{activeProjects}</h3>
               <p>In Progress</p>
             </div>
           </div>
-          <div className="stat-card completed">
-            <div className="stat-icon"><FaCheckCircle /></div>
-            <div className="stat-info">
+          <div className="student-stat-card completed">
+            <div className="student-stat-icon"><FaCheckCircle /></div>
+            <div className="student-stat-info">
               <h3>{completedProjects}</h3>
               <p>Completed</p>
             </div>
@@ -106,35 +106,35 @@ function StudentDashboard() {
         </div>
 
         {/* Main Grid Layout */}
-        <div className="main-dashboard-grid">
+        <div className="student-main-grid">
 
           {/* Left Column: Projects */}
-          <div className="projects-section">
-            <div className="section-header">
-              <h2><FaRocket className="section-icon" /> Active Projects</h2>
+          <div className="student-projects-section">
+            <div className="student-section-header">
+              <h2><FaRocket className="student-section-icon" /> Active Projects</h2>
             </div>
             <Dashboard projects={projects.filter(p => !p.isCompleted)} loading={loading} />
           </div>
 
           {/* Right Column: Quick Actions */}
-          <div className="sidebar-section">
-            <div className="dashboard-card quick-actions-card">
+          <div className="student-sidebar-section">
+            <div className="student-card student-quick-actions-card">
               <h3>Quick Actions</h3>
-              <div className="action-buttons">
-                <button className="action-btn primary" onClick={() => navigate('/create-project?new=true')}>
-                  <div className="btn-icon"><FaPlus /></div>
+              <div className="student-action-buttons">
+                <button className="student-action-btn primary" onClick={() => navigate('/create-project?new=true')}>
+                  <div className="student-btn-icon"><FaPlus /></div>
                   <span>New Project</span>
                 </button>
-                <button className="action-btn secondary" onClick={() => navigate('/create-team')}>
-                  <div className="btn-icon"><FaUsers /></div>
+                <button className="student-action-btn secondary" onClick={() => navigate('/create-team')}>
+                  <div className="student-btn-icon"><FaUsers /></div>
                   <span>Create Team</span>
                 </button>
               </div>
 
               {/* Instructions Link */}
-              <div className="instructions-link-wrapper">
-                <button className="instructions-link" onClick={() => setShowInstructions(true)}>
-                  <FaInfoCircle className="info-icon" />
+              <div className="student-instructions-link-wrapper">
+                <button className="student-instructions-link" onClick={() => setShowInstructions(true)}>
+                  <FaInfoCircle className="student-info-icon" />
                   <span>View Important Instructions</span>
                 </button>
               </div>
@@ -145,16 +145,16 @@ function StudentDashboard() {
 
       {/* Instructions Modal */}
       {showInstructions && (
-        <div className="modal-overlay" onClick={() => setShowInstructions(false)}>
-          <div className="modal-content instructions-modal" onClick={(e) => e.stopPropagation()}>
-            <div className="modal-header">
+        <div className="student-modal-overlay" onClick={() => setShowInstructions(false)}>
+          <div className="student-modal-content student-instructions-modal" onClick={(e) => e.stopPropagation()}>
+            <div className="student-modal-header">
               <h3><FaInfoCircle /> Important Instructions</h3>
-              <button className="close-btn-icon" onClick={() => setShowInstructions(false)}>
+              <button className="student-close-btn-icon" onClick={() => setShowInstructions(false)}>
                 <FaTimes />
               </button>
             </div>
-            <div className="modal-body">
-              <ul className="instruction-list">
+            <div className="student-modal-body">
+              <ul className="student-instruction-list">
                 <li>
                   Create your <strong>Team</strong> before initiating any project. A valid <strong>Team ID</strong> is required.
                 </li>
@@ -169,8 +169,8 @@ function StudentDashboard() {
                 </li>
               </ul>
             </div>
-            <div className="modal-footer">
-              <button className="close-btn" onClick={() => setShowInstructions(false)}>Got it!</button>
+            <div className="student-modal-footer">
+              <button className="student-close-btn" onClick={() => setShowInstructions(false)}>Got it!</button>
             </div>
           </div>
         </div>

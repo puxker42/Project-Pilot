@@ -3,21 +3,23 @@ const MidOrder = require('../models/MidOrder');
 const Project = require('../models/Project');
 const ReqTable = require('../models/ReqTable');
 const Cart = require('../models/Cart');
+const StockLog = require('../models/StockLog');
+const ProjectLog = require('../models/ProjectLog');
 // GET: Retrieve all components
 exports.getAllComponents = async (req, res) => {
-    try {
-        const data = await Component.find();
-        res.status(200).json({
-            success: true,
-            data
-        });
-    } catch (error) {
-        res.status(500).json({
-            success: false,
-            message: 'Failed to fetch components',
-            error: error.message
-        });
-    }
+  try {
+    const data = await Component.find();
+    res.status(200).json({
+      success: true,
+      data
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: 'Failed to fetch components',
+      error: error.message
+    });
+  }
 };
 
 
@@ -60,7 +62,16 @@ exports.createComponent = async (req, res) => {
     });
 
     const savedComponent = await newComponent.save();
-
+    //Stock Log
+    const stockLog = new StockLog({
+      componentID: savedComponent.cID,
+      source: 'Manual',
+      destination: 'Stock',
+      type: 'IN',
+      quantity: savedComponent.qnty,
+      remark: `Component ${savedComponent.cID} checked in from stock`
+    });
+    await stockLog.save();
     res.status(201).json({
       success: true,
       message: "Component created successfully.",
@@ -82,126 +93,179 @@ exports.createComponent = async (req, res) => {
 
 // GET: Get a single component by ID
 exports.getComponent = async (req, res) => {
-    try {
-        const { cID } = req.params;
-        const component = await Component.findOne({ cID });
+  try {
+    const { cID } = req.params;
+    const component = await Component.findOne({ cID });
 
-        if (!component) {
-            return res.status(404).json({
-                success: false,
-                message: "Component not found"
-            });
-        }
-
-        res.status(200).json({
-            success: true,
-            data: component
-        });
-
-    } catch (error) {
-        res.status(500).json({
-            success: false,
-            message: "Failed to fetch component",
-            error: error.message
-        });
+    if (!component) {
+      return res.status(404).json({
+        success: false,
+        message: "Component not found"
+      });
     }
+
+    res.status(200).json({
+      success: true,
+      data: component
+    });
+
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: "Failed to fetch component",
+      error: error.message
+    });
+  }
 };
 
 // PUT: Update a component by ID
 exports.updateComponent = async (req, res) => {
-    try {
-        const { cID } = req.params;
-        const updatedComponent = await Component.findOneAndUpdate(
-            { cID },
-            req.body,
-            { new: true, runValidators: true }
-        );
+  try {
+    const { cID } = req.params;
 
-        if (!updatedComponent) {
-            return res.status(404).json({
-                success: false,
-                message: "Component not found"
-            });
-        }
-
-        res.status(200).json({
-            success: true,
-            data: updatedComponent
-        });
-
-    } catch (error) {
-        res.status(400).json({
-            success: false,
-            message: "Failed to update component",
-            error: error.message
-        });
+    // Fetch existing validation
+    const existingComp = await Component.findOne({ cID });
+    if (!existingComp) {
+      return res.status(404).json({
+        success: false,
+        message: "Component not found"
+      });
     }
+
+    // Check for quantity change
+    if (req.body.qnty !== undefined) {
+      const newQty = Number(req.body.qnty);
+      const oldQty = existingComp.qnty;
+      const diff = newQty - oldQty;
+
+      if (diff !== 0) {
+        const stockLog = new StockLog({
+          componentID: cID,
+          source: 'Manual Update',
+          destination: 'Stock',
+          type: diff > 0 ? 'IN' : 'OUT',
+          quantity: Math.abs(diff),
+          remark: `Stock updated via edit. Old: ${oldQty}, New: ${newQty}`
+        });
+        await stockLog.save();
+      }
+    }
+
+    const updatedComponent = await Component.findOneAndUpdate(
+      { cID },
+      req.body,
+      { new: true, runValidators: true }
+    );
+
+    res.status(200).json({
+      success: true,
+      data: updatedComponent
+    });
+
+  } catch (error) {
+    res.status(400).json({
+      success: false,
+      message: "Failed to update component",
+      error: error.message
+    });
+  }
 };
 
 // DELETE: Delete a component by ID
 exports.deleteComponent = async (req, res) => {
-    try {
-        const { cID } = req.params;
-        const deletedComponent = await Component.findOneAndDelete({ cID });
+  try {
+    const { cID } = req.params;
+    const deletedComponent = await Component.findOneAndDelete({ cID });
 
-        if (!deletedComponent) {
-            return res.status(404).json({
-                success: false,
-                message: "Component not found"
-            });
-        }
-
-        res.status(200).json({
-            success: true,
-            message: "Component deleted successfully",
-            data: deletedComponent
-        });
-
-    } catch (error) {
-        res.status(500).json({
-            success: false,
-            message: "Failed to delete component",
-            error: error.message
-        });
+    if (!deletedComponent) {
+      return res.status(404).json({
+        success: false,
+        message: "Component not found"
+      });
     }
+
+    if (deletedComponent.qnty > 0) {
+      const stockLog = new StockLog({
+        componentID: cID,
+        source: 'Component Deletion',
+        destination: 'Void',
+        type: 'OUT',
+        quantity: deletedComponent.qnty,
+        remark: `Component ${cID} deleted from system.`
+      });
+      await stockLog.save();
+    }
+
+    res.status(200).json({
+      success: true,
+      message: "Component deleted successfully",
+      data: deletedComponent
+    });
+
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: "Failed to delete component",
+      error: error.message
+    });
+  }
 };
 
 
 //PUT: Make Available !
 exports.makeAvailable = async (req, res) => {
-    try {
-        const { quantity, loc } = req.body;
-        const { cID } = req.params;
+  try {
+    const { quantity, loc } = req.body;
+    const { cID } = req.params;
 
-        const user = await Component.findOneAndUpdate(
-            { cID },
-            {
-                available: true,
-                qnty: quantity,
-                loc: loc,
-            },
-            { new: true }
-        );
-        // if(user){}
-        if (!user) {
-            return res.status(404).json({
-                success: false,
-                message: "No matching Component!"
-            });
-        }
+    const existingComp = await Component.findOne({ cID });
+    const oldQty = existingComp ? existingComp.qnty : 0;
 
-        return res.status(200).json({
-            success: true,
-            message: "Updated Successfully!",
-            data: user
+    const user = await Component.findOneAndUpdate(
+      { cID },
+      {
+        available: true,
+        qnty: quantity,
+        loc: loc,
+      },
+      { new: true }
+    );
+
+    // Calculate diff and log
+    if (user && existingComp) {
+      const diff = quantity - oldQty;
+      if (diff !== 0) {
+        const stockLog = new StockLog({
+          componentID: cID,
+          source: 'Manual Adjustment',
+          destination: 'Stock',
+          type: diff > 0 ? 'IN' : 'OUT',
+          quantity: Math.abs(diff),
+          remark: `Stock adjustment via updated. Old: ${oldQty}, New: ${quantity}`
         });
-    } catch (error) {
-        console.log(error);
-        return res.status(400).json({
-            success: false,
-            message: "Cannot Update Component!"
-        });
+        await stockLog.save();
+      }
     }
+    // if(user){}
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "No matching Component!"
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: "Updated Successfully!",
+      data: user
+    });
+  } catch (error) {
+    console.log(error);
+    return res.status(400).json({
+      success: false,
+      message: "Cannot Update Component!"
+    });
+  }
 };
 const getRequiredOrder = async () => {
   try {
@@ -291,44 +355,44 @@ exports.getMidOrder = async () => {
 
 
 exports.generateOrder = async (req, res) => {
-    try {
-        // Step 1: First, clear any existing MidOrders
-        await MidOrder.deleteMany({});
+  try {
+    // Step 1: First, clear any existing MidOrders
+    await MidOrder.deleteMany({});
 
-        // Step 2: Generate new MidOrder data
-        const result = await getRequiredOrder();
+    // Step 2: Generate new MidOrder data
+    const result = await getRequiredOrder();
 
-        // Step 3: Check if the generation was successful
-        if (!result.success) {
-            return res.status(500).json({
-                success: false,
-                message: result.message,
-                error: result.error
-            });
-        }
-
-        // Step 4: Extract only required fields to send
-        const filteredMidOrders = result.midOrders.map(order => ({
-            ID: order.ID,
-            name: order.name,
-            reqty: order.reqty
-        }));
-
-        // Step 6: Send the response
-        return res.status(200).json({
-            success: true,
-            message: "Order data generated successfully.",
-            orders: filteredMidOrders
-        });
-
-    } catch (error) {
-        console.error("Error in generateOrder:", error);
-        return res.status(500).json({
-            success: false,
-            message: "Internal Server Error in generateOrder",
-            error: error.message
-        });
+    // Step 3: Check if the generation was successful
+    if (!result.success) {
+      return res.status(500).json({
+        success: false,
+        message: result.message,
+        error: result.error
+      });
     }
+
+    // Step 4: Extract only required fields to send
+    const filteredMidOrders = result.midOrders.map(order => ({
+      ID: order.ID,
+      name: order.name,
+      reqty: order.reqty
+    }));
+
+    // Step 6: Send the response
+    return res.status(200).json({
+      success: true,
+      message: "Order data generated successfully.",
+      orders: filteredMidOrders
+    });
+
+  } catch (error) {
+    console.error("Error in generateOrder:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Internal Server Error in generateOrder",
+      error: error.message
+    });
+  }
 };
 
 const Order = require('../models/Order');
@@ -370,19 +434,19 @@ exports.createOrder = async (req, res) => {
 };
 
 exports.fetchMidOrder = async (req, res) => {
-    try{
-        const midOrder = await MidOrder.find({});
-        return res.status(200).json({
-            succes:true,
-            data:midOrder
-        });
-    }catch(error){
-        console.log(error);
-        return res.status(401).json({
-            succes:false,
-            message:error
-        })
-    }
+  try {
+    const midOrder = await MidOrder.find({});
+    return res.status(200).json({
+      succes: true,
+      data: midOrder
+    });
+  } catch (error) {
+    console.log(error);
+    return res.status(401).json({
+      succes: false,
+      message: error
+    })
+  }
 };
 
 // const Project = require('../models/Project');
@@ -485,6 +549,16 @@ exports.updateMidOrder = async (req, res) => {
 
         if (updated) {
           await project.save();
+
+          // Log Project Component Update
+          const log = new ProjectLog({
+            projectID: project.ID,
+            action: 'GRID_UPDATE',
+            message: `Components grid updated via MidOrder`,
+            actor: req.user ? req.user.userId : 'System',
+            remark: `Cart linked. Fulfilled updated.`
+          });
+          await log.save();
         }
 
         if (remainingQty <= 0) break;
@@ -527,20 +601,20 @@ exports.updateMidOrder = async (req, res) => {
 
 
 exports.getReqTable = async (req, res) => {
-    try{
-        const data = await ReqTable.find({});
-        return res.status(200).json({
-            success:true, 
-            message:"Done",
-            data
-        });
-    }catch(error){
-        console.log(error);
-        return res.status(500).json({
-            success:false,
-            message:"Unable !"
-        });
-    }
+  try {
+    const data = await ReqTable.find({});
+    return res.status(200).json({
+      success: true,
+      message: "Done",
+      data
+    });
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({
+      success: false,
+      message: "Unable !"
+    });
+  }
 };
 
 
@@ -573,13 +647,24 @@ exports.createComponentInForm = async (req, res) => {
     console.log(newComponent);
     const savedComponent = await newComponent.save();
 
+    //Stock Log
+    const stockLog = new StockLog({
+      componentID: savedComponent.cID,
+      source: 'Manual Form',
+      destination: 'Stock',
+      type: 'IN',
+      quantity: savedComponent.qnty,
+      remark: `Component ${savedComponent.cID} created via form`
+    });
+    await stockLog.save();
+
     res.status(201).json({
       success: true,
       component: savedComponent
     });
 
   } catch (error) {
-          console.log(error);
+    console.log(error);
     res.status(400).json({
 
       success: false,

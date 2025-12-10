@@ -158,9 +158,9 @@ function SignUp() {
               <select name='accountType' value={formData.accountType} onChange={handleChange} className='form-input' required>
                 <option value=''>-- Select Role --</option>
                 <option value='Student'>Student</option>
-                <option value='Instructor'>Instructor</option>
-                <option value='Admin'>Admin</option>
-                <option value='Manager'>Manager</option>
+                {/* <option value='Instructor'>Instructor</option> */}
+                {/* <option value='Admin'>Admin</option>
+                <option value='Manager'>Manager</option> */}
               </select>
             </div>
 

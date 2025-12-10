@@ -1,7 +1,11 @@
 const Project = require('../models/Project');
 const User = require('../models/User');
-const Team = require('../models/User');
+const Team = require('../models/Team');
 const sendMail = require('../utils/mailSender');
+const StockLog = require('../models/StockLog');
+const ProjectLog = require('../models/ProjectLog');
+const jwt = require('jsonwebtoken');
+const Component = require('../models/Component');
 
 exports.addToSlot = async (req, res) => {
   try {
@@ -32,10 +36,7 @@ exports.addToSlot = async (req, res) => {
             slotn: slot,
             date: new Date(date),
           },
-          slot: {
-            slotn: slot,
-            date: new Date(date),
-          },
+
           slotAssigned: true,
           status: 3
         },
@@ -75,6 +76,18 @@ exports.addToSlot = async (req, res) => {
 
     await sendMail(leadUser.email, subject, body);
 
+
+
+    // Log Slot Project
+    const log = new ProjectLog({
+      projectID: updatedProject.ID,
+      action: 'SLOT_ASSIGNED',
+      message: `Slot ${slotTime} (${new Date(date).toLocaleDateString()}) assigned`,
+      actor: req.user ? req.user.userId : 'System',
+      remark: 'Slot assignment'
+    });
+    await log.save();
+
     res.status(200).json({
       message: 'Slot assigned successfully and mail sent to team lead.',
       project: updatedProject,
@@ -85,7 +98,7 @@ exports.addToSlot = async (req, res) => {
   }
 };
 
-const jwt = require('jsonwebtoken');
+
 
 exports.checkInVerify = async (req, res) => {
   console.log("Inside CheckInVerify");
@@ -225,7 +238,7 @@ exports.getTokenProject = async (req, res) => {
     return res.status(401).json({ message: 'Token is invalid or expired', error: error.message });
   }
 };
-const Component = require('../models/Component');
+
 
 exports.updateDelivery = async (req, res) => {
   try {
@@ -293,9 +306,29 @@ exports.updateDelivery = async (req, res) => {
       if (inventoryComp) {
         inventoryComp.qnty = Math.max(0, inventoryComp.qnty - receivedQty);
         inventoryComp.issued = (inventoryComp.issued || 0) + receivedQty;
+        //Stock Log
+        const stockLog = new StockLog({
+          componentID: comID,
+          source: 'Stock',
+          destination: finalProject.ID || 'Project',
+          type: 'OUT',
+          quantity: receivedQty,
+          remark: `Component ${comID} checked out for project ${finalProject.ID}`
+        });
+        await stockLog.save();
         await inventoryComp.save();
       }
     }
+
+    // Log Delivery
+    const log = new ProjectLog({
+      projectID: finalProject.ID,
+      action: denied ? 'DELIVERY_DENIED' : 'DELIVERY_ACKNOWLEDGED',
+      message: denied ? 'Delivery denied by user' : 'Delivery verified and inventory updated',
+      actor: req.user ? req.user.userId : 'System',
+      remark: 'Distribution'
+    });
+    await log.save();
 
     return res.status(200).json({
       message: 'Delivery acknowledged. Project and inventory updated.',
@@ -310,3 +343,4 @@ exports.updateDelivery = async (req, res) => {
     });
   }
 };
+

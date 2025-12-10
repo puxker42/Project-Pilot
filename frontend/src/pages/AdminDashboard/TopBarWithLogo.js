@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { FaBars, FaUserCircle, FaSignOutAlt } from 'react-icons/fa';
+import { FaUserCircle, FaSignOutAlt } from 'react-icons/fa';
 import logo from '../../images/logo.png';
 import './TopBarWithLogo.css';
 
@@ -29,18 +29,9 @@ async function getUserData() {
 
 function TopBarWithLogo({ title }) {
   const [userName, setUserName] = useState('');
-  const [sidebarOpen, setSidebarOpen] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState(false);
-  const sidebarRef = useRef(null);
   const dropdownRef = useRef(null);
   const navigate = useNavigate();
-
-  const sidebarActions = [
-    { name: 'Team Creator Wizard', path: '/create-team' },
-    { name: 'Project Creator Wizard', path: '/create-project?new=true' },
-    { name: 'My Projects', path: '/my-projects' },
-    { name: 'Teams', path: '/my-teams' }
-  ];
 
   const handleLogout = () => {
     localStorage.removeItem('token');
@@ -52,10 +43,6 @@ function TopBarWithLogo({ title }) {
   };
 
   const handleClickOutside = (e) => {
-    if (sidebarOpen && sidebarRef.current && !sidebarRef.current.contains(e.target)) {
-      setSidebarOpen(false);
-    }
-
     if (dropdownOpen && dropdownRef.current && !dropdownRef.current.contains(e.target)) {
       setDropdownOpen(false);
     }
@@ -68,16 +55,22 @@ function TopBarWithLogo({ title }) {
       setUserName(firstName);
     }
     fetchData();
+
+    // Note: The original listener logic had stale closure issues if not updated. 
+    // Since we only have one dropdown now, we can try to fix it or leave as is.
+    // For now, I'll attach the listener but be aware of the stale closure if I don't use a ref for state or update dependency.
+    // To match original behavior (buggy or not) but cleaner:
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
-// onClick={() => navigate(localStorage.getItem('homepath'))}
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [dropdownOpen]); // Added dropdownOpen to dependency to fix stale closure for handleClickOutside
+
   return (
     <>
       <div className="topbar-with-logo">
         <div className="logo-title-container">
-          <FaBars className="menu-icon" onClick={() => setSidebarOpen(!sidebarOpen)} />
-          <img  src={logo} alt="Logo" className="topbar-logo" />
+          {/* Sidebar toggle removed */}
+          <img src={logo} alt="Logo" className="topbar-logo" />
           <span className="topbar-title">{title}</span>
         </div>
         <div className="user-info1" ref={dropdownRef}>
@@ -95,14 +88,6 @@ function TopBarWithLogo({ title }) {
             )}
           </div>
         </div>
-      </div>
-
-      <div ref={sidebarRef} className={`sidebar-collapse ${sidebarOpen ? 'open' : ''}`}>
-        {sidebarActions.map((action, index) => (
-          <button key={index} onClick={() => navigate(action.path)}>
-            {action.name}
-          </button>
-        ))}
       </div>
     </>
   );

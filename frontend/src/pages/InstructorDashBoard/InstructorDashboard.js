@@ -55,7 +55,9 @@ const InstructorDashboard = () => {
               </div>
               <h3>{action.title}</h3>
               <p>{action.description}</p>
-              <button className="action-btn" style={{ color: action.color }}>Go to {action.title} &rarr;</button>
+              <button className="instructor-nav-btn" style={{ backgroundColor: action.color }}>
+                Go to {action.title} &rarr;
+              </button>
             </div>
           ))}
         </div>

@@ -47,10 +47,10 @@ const CreateComponent = ({ onComponentCreated }) => {
   const [errorMessage, setErrorMessage] = useState('');
   const navigate = useNavigate();
   useEffect(() => {
-    setGeneratedCID(`COM${Math.floor(1000 + Math.random() * 9000)}`);
+    setGeneratedCID(`COM${Math.floor(10000 + Math.random() * 90000)}`);
   }, []);
   const location = useLocation();
-const returnTo = location.state?.returnTo || -1;
+  const returnTo = location.state?.returnTo || -1;
 
 
   const handleChange = (e) => {
@@ -176,18 +176,18 @@ const returnTo = location.state?.returnTo || -1;
         compressedImageBase64: null,
       });
       setImagePreview(null);
-      setGeneratedCID(`COM${Math.floor(1000 + Math.random() * 9000)}`);
+      setGeneratedCID(`COM${Math.floor(10000 + Math.random() * 90000)}`);
       navigate(returnTo, {
-  state: {
-    newComponent: {
-      name: formData.title,
-      id: generatedCID,
-      description: formData.description,
-      quantity: Number(formData.qnty),
-      price: formData.price
-    }
-  }
-});
+        state: {
+          newComponent: {
+            name: formData.title,
+            id: generatedCID,
+            description: formData.description,
+            quantity: Number(formData.qnty),
+            price: formData.price
+          }
+        }
+      });
 
     } catch (err) {
       console.error('Component creation failed:', err);
@@ -199,63 +199,63 @@ const returnTo = location.state?.returnTo || -1;
   return (
     <div className="create-component-container">
       {/* <h2>Create New Component</h2> */}
-      <TopBarWithLogo title='Component Creation Utility'/>
+      <TopBarWithLogo title='Component Creation Utility' />
       <div className='mastt'>
-          {generatedCID && <p className="cid-label">Generated Component ID: <strong>{generatedCID}</strong></p>}
+        {generatedCID && <p className="cid-label">Generated Component ID: <strong>{generatedCID}</strong></p>}
 
-          <form onSubmit={handleSubmit} className="create-component-form">
-            <div className="form-row">
-              <label>Component Title*</label>
-              <input type="text" name="title" value={formData.title} onChange={handleChange} required />
+        <form onSubmit={handleSubmit} className="create-component-form">
+          <div className="form-row">
+            <label>Component Title*</label>
+            <input type="text" name="title" value={formData.title} onChange={handleChange} required />
+          </div>
+
+          <div className="form-row">
+            <label>Description</label>
+            <textarea name="description" value={formData.description} onChange={handleChange} />
+          </div>
+
+          <div className="form-row">
+            <label>Initial Quantity*</label>
+            <input type="number" name="qnty" value={formData.qnty} onChange={handleChange} min="0" required />
+          </div>
+
+          <div className="form-row">
+            <label>Add Local Image</label>
+            <input type="file" accept="image/*" onChange={handleImageUpload} />
+          </div>
+
+          <div className="form-row">
+            <label>Location*</label>
+            <input type="text" name="loc" value={formData.loc} onChange={handleChange} required />
+          </div>
+
+          <div className="form-row">
+            <label>Or Image URL</label>
+            <input type="text" name="imageURL" value={formData.imageURL} onChange={handleChange} />
+          </div>
+
+          <div className="form-row">
+            <label>Approximate Price*</label>
+            <input type="text" name="price" value={formData.price} onChange={handleChange} required />
+          </div>
+
+          <div className="dropzone" onDragOver={(e) => e.preventDefault()} onDrop={handleDrop}>
+            <p>Drag & Drop an image here</p>
+          </div>
+
+          {imagePreview && (
+            <div className="image-preview">
+              <img src={imagePreview} alt="Preview" />
+              <a href="#" onClick={(e) => { e.preventDefault(); handleRemoveImage(); }} className="remove-img-link">
+                Remove Image
+              </a>
             </div>
+          )}
 
-            <div className="form-row">
-              <label>Description</label>
-              <textarea name="description" value={formData.description} onChange={handleChange} />
-            </div>
+          {successMessage && <p className="success-msg">{successMessage}</p>}
+          {errorMessage && <p className="error-msg">{errorMessage}</p>}
 
-            <div className="form-row">
-              <label>Initial Quantity*</label>
-              <input type="number" name="qnty" value={formData.qnty} onChange={handleChange} min="0" required />
-            </div>
-
-            <div className="form-row">
-              <label>Add Local Image</label>
-              <input type="file" accept="image/*" onChange={handleImageUpload} />
-            </div>
-
-            <div className="form-row">
-              <label>Location*</label>
-              <input type="text" name="loc" value={formData.loc} onChange={handleChange} required />
-            </div>
-
-            <div className="form-row">
-              <label>Or Image URL</label>
-              <input type="text" name="imageURL" value={formData.imageURL} onChange={handleChange} />
-            </div>
-
-            <div className="form-row">
-              <label>Approximate Price*</label>
-              <input type="text" name="price" value={formData.price} onChange={handleChange} required />
-            </div>
-
-            <div className="dropzone" onDragOver={(e) => e.preventDefault()} onDrop={handleDrop}>
-              <p>Drag & Drop an image here</p>
-            </div>
-
-            {imagePreview && (
-              <div className="image-preview">
-                <img src={imagePreview} alt="Preview" />
-                <a href="#" onClick={(e) => { e.preventDefault(); handleRemoveImage(); }} className="remove-img-link">
-                  Remove Image
-                </a>
-              </div>
-            )}
-
-            {successMessage && <p className="success-msg">{successMessage}</p>}
-            {errorMessage && <p className="error-msg">{errorMessage}</p>}
-
-            <button type="submit" className="submit-btn">Create Component</button>
+          <button type="submit" className="submit-btn">Create Component</button>
         </form>
       </div>
     </div>

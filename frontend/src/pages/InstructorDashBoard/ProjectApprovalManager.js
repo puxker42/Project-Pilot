@@ -277,6 +277,7 @@ const ProjectApprovalManager = () => {
           <Tabs value={tabValue} onChange={handleTabChange}>
             <Tab label="Details" />
             <Tab label={`Reports (${project.reports?.length || 0})`} />
+            <Tab label="Team Details" />
           </Tabs>
         </DialogTitle>
 
@@ -302,7 +303,7 @@ const ProjectApprovalManager = () => {
                   </Typography>
                   <Grid container spacing={3}>
                     {/* Guide Information */}
-                    <Grid item xs={12} md={6}>
+                    <Grid item xs={12}>
                       <Paper elevation={0} sx={{ p: 2.5, height: '100%', border: '1px solid #e0e0e0', borderRadius: 2 }}>
                         <Box display="flex" alignItems="center" gap={1} mb={2}>
                           <Person sx={{ fontSize: 22, color: 'primary.main' }} />
@@ -346,53 +347,7 @@ const ProjectApprovalManager = () => {
                       </Paper>
                     </Grid>
 
-                    {/* Team Information */}
-                    <Grid item xs={12} md={6}>
-                      <Paper elevation={0} sx={{ p: 2.5, height: '100%', border: '1px solid #e0e0e0', borderRadius: 2 }}>
-                        <Box display="flex" alignItems="center" gap={1} mb={2}>
-                          <Group sx={{ fontSize: 22, color: 'primary.main' }} />
-                          <Typography variant="subtitle2" fontWeight={600}>
-                            Team Information
-                          </Typography>
-                        </Box>
-                        <Stack spacing={1.5}>
-                          <Box>
-                            <Typography variant="body1" fontWeight={600}>
-                              {project.team?.teamName || 'N/A'}
-                            </Typography>
-                            <Typography variant="caption" color="text.secondary" sx={{ fontFamily: 'monospace' }}>
-                              {project.team?.teamID || 'N/A'}
-                            </Typography>
-                          </Box>
-                          {project.team?.batch && (
-                            <Box display="flex" alignItems="center" gap={1}>
-                              <School sx={{ fontSize: 18, color: 'text.secondary' }} />
-                              <Typography variant="body2" color="text.secondary">
-                                Batch: <strong>{project.team.batch}</strong>
-                              </Typography>
-                            </Box>
-                          )}
-                          {project.team?.members && project.team.members.length > 0 && (
-                            <Box>
-                              <Typography variant="caption" color="text.secondary" fontWeight={600} display="block" mb={1}>
-                                MEMBERS ({project.team.members.length})
-                              </Typography>
-                              <Stack direction="row" spacing={1} flexWrap="wrap" gap={1}>
-                                {project.team.members.map((member, idx) => (
-                                  <Chip
-                                    key={idx}
-                                    label={`${member.userID}`}
-                                    size="small"
-                                    color={member.role === 'Lead' ? 'primary' : 'default'}
-                                    sx={{ fontFamily: 'monospace', fontWeight: 500 }}
-                                  />
-                                ))}
-                              </Stack>
-                            </Box>
-                          )}
-                        </Stack>
-                      </Paper>
-                    </Grid>
+
 
                     {/* Additional Info */}
                     <Grid item xs={12}>
@@ -629,6 +584,107 @@ const ProjectApprovalManager = () => {
                 </Stack>
               ) : (
                 <Typography color="textSecondary">No reports submitted yet.</Typography>
+              )}
+            </Box>
+          )}
+
+          {tabValue === 2 && (
+            <Box sx={{ p: 3 }}>
+              <Box display="flex" alignItems="center" gap={1.5} mb={3}>
+                <Group sx={{ fontSize: 28, color: 'primary.main' }} />
+                <Typography variant="h6" fontWeight={600}>
+                  Team Details
+                </Typography>
+                {project.team?.teamName && (
+                  <Chip
+                    label={project.team.teamName}
+                    color="primary"
+                    variant="outlined"
+                    sx={{ fontWeight: 600 }}
+                  />
+                )}
+              </Box>
+
+              {project.team?.members && project.team.members.length > 0 ? (
+                <TableContainer component={Paper} variant="outlined" sx={{ borderRadius: 2 }}>
+                  <Table>
+                    <TableHead>
+                      <TableRow sx={{ bgcolor: '#f8f9fa' }}>
+                        <TableCell sx={{ fontWeight: 700 }}>Student Name</TableCell>
+                        <TableCell sx={{ fontWeight: 700 }}>PRN</TableCell>
+                        <TableCell sx={{ fontWeight: 700 }}>Contact</TableCell>
+                        <TableCell align="center" sx={{ fontWeight: 700 }}>Role</TableCell>
+                      </TableRow>
+                    </TableHead>
+                    <TableBody>
+                      {project.team.members.map((member, idx) => (
+                        <TableRow key={idx} hover>
+                          <TableCell>
+                            <Box display="flex" alignItems="center" gap={2}>
+                              <Avatar
+                                src={member.image}
+                                alt={member.firstName}
+                                sx={{ width: 40, height: 40 }}
+                              >
+                                {member.firstName ? member.firstName.charAt(0) : <Person />}
+                              </Avatar>
+                              <Box>
+                                <Typography variant="subtitle2" fontWeight={600}>
+                                  {member.firstName ? `${member.firstName} ${member.lastName}` : 'Unknown Name'}
+                                </Typography>
+                                <Typography variant="caption" color="text.secondary">
+                                  {member.email}
+                                </Typography>
+                              </Box>
+                            </Box>
+                          </TableCell>
+                          <TableCell>
+                            <Chip
+                              label={member.userID}
+                              size="small"
+                              sx={{ fontFamily: 'monospace', fontWeight: 600, bgcolor: '#e3f2fd', color: 'primary.main' }}
+                            />
+                          </TableCell>
+                          <TableCell>
+                            {member.contactNumber ? (
+                              <Box display="flex" alignItems="center" gap={1}>
+                                <Phone sx={{ fontSize: 16, color: 'text.secondary' }} />
+                                <Typography variant="body2">{member.contactNumber}</Typography>
+                              </Box>
+                            ) : (
+                              <Typography variant="body2" color="text.disabled">-</Typography>
+                            )}
+                          </TableCell>
+                          <TableCell align="center">
+                            {member.role === 'Lead' ? (
+                              <Chip
+                                icon={<Celebration sx={{ fontSize: 16 }} />}
+                                label="Lead"
+                                color="primary"
+                                size="small"
+                                sx={{ fontWeight: 600 }}
+                              />
+                            ) : (
+                              <Chip
+                                label="Member"
+                                size="small"
+                                variant="outlined"
+                                sx={{ fontWeight: 500 }}
+                              />
+                            )}
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </TableContainer>
+              ) : (
+                <Paper elevation={0} sx={{ p: 4, textAlign: 'center', bgcolor: '#f8f9fa', borderRadius: 2 }}>
+                  <Group sx={{ fontSize: 48, color: 'text.disabled', mb: 2 }} />
+                  <Typography variant="subtitle1" color="text.secondary">
+                    No team members found for this project.
+                  </Typography>
+                </Paper>
               )}
             </Box>
           )}

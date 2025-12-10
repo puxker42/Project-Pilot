@@ -5,6 +5,7 @@ const Project = require('../models/Project');
 const Team = require('../models/Team');
 const User = require('../models/User');
 // Use your configured mail utility
+const StockLog = require('../models/StockLog');
 const sendMail = require('../utils/mailSender'); // Adjust path accordingly
 require('dotenv').config();
 
@@ -13,14 +14,14 @@ const JWT_SECRET = process.env.JWT_SECRET;
 
 // Function to generate unique CRT ID
 function generateCRTCode() {
-  const randomNumber = Math.floor(1000 + Math.random() * 9000);
+  const randomNumber = Math.floor(10000 + Math.random() * 90000);
   return "CRT" + randomNumber;
 }
 
 // Create Cart Controller
 exports.createCart = async (req, res) => {
   try {
-    const {  details } = req.body;
+    const { details } = req.body;
 
     if (!details || !Array.isArray(details) || details.length === 0) {
       return res.status(400).json({ success: false, message: "Details array is required" });
@@ -78,39 +79,39 @@ exports.getCarts = async (req, res) => {
 
 
 exports.orderCart = async (req, res) => {
-  try{
+  try {
     console.log("Inside Order Cart");
-    const {vendorID, vendorName, orderDate, cartId} = req.body;
-    const cart = await Cart.findOne({ID:cartId});
+    const { vendorID, vendorName, orderDate, cartId } = req.body;
+    const cart = await Cart.findOne({ ID: cartId });
     cart.vendorID = vendorID;
     cart.vendorName = vendorName;
     cart.orderDate = orderDate;
     cart.ordered = true
     await cart.save();
     return res.status(201).json({
-      success:true,
-      message:"Cart Ordered Successfully "
+      success: true,
+      message: "Cart Ordered Successfully "
     })
-  }catch(error){
+  } catch (error) {
     console.error(error);
     return res.status(500).json({ success: false, message: "Internal server error" });
   }
 }
 
 exports.getCart = async (req, res) => {
-  try{
+  try {
     console.log("Inside Get Cart")
-    const {cartID} = req.params;
+    const { cartID } = req.params;
     console.log(cartID);
-    const cart = await Cart.findOne({ID:cartID});
+    const cart = await Cart.findOne({ ID: cartID });
     return res.status(201).json({
-      success:true,
-      data:cart
+      success: true,
+      data: cart
     });
-  }catch(error){
+  } catch (error) {
     return res.status(500).json({
-      success:false,
-      message:error
+      success: false,
+      message: error
     })
   }
 };
@@ -172,6 +173,17 @@ exports.checkInCart = async (req, res) => {
       if (tcmp && typeof comp.finally === 'number') {
         tcmp.qnty += comp.finally; // ✅ Correct access based on schema
         await tcmp.save();
+
+        //here add stock log
+        const stockLog = new StockLog({
+          componentID: comp.ID,
+          source: cart.ID,
+          destination: 'Stock',
+          type: 'IN',
+          quantity: comp.finally,
+          remark: `Component ${comp.ID} checked in from cart ${cart.ID}`
+        });
+        await stockLog.save();
       }
     }
 

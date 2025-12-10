@@ -125,8 +125,8 @@ function TopBarWithLogo({ title }) {
   useEffect(() => {
     async function fetchData() {
       const name = await getUserData();
-      const firstName = name.split(' ')[0];
-      setUserName(firstName);
+      // const firstName = name.split(' ')[0]; // This was causing "Prof." to show because it took the first word
+      setUserName(name);
     }
     fetchData();
   }, []);

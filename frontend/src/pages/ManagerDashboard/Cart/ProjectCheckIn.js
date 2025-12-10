@@ -155,7 +155,7 @@ export default function ProjectCheckIn() {
             type="text"
             value={inputID}
             onChange={(e) => setInputID(e.target.value)}
-            placeholder="Enter Project ID (e.g., PRJ1234)"
+            placeholder="Enter Project ID (e.g., PRJ12345)"
           />
           <button onClick={handleSearch}>Search</button>
         </div>

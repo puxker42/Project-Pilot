@@ -103,7 +103,8 @@ function TopBarWithLogo({ title = 'Department of Electronics Engineering    |   
     { name: 'Distribute Components', path: '/check-out' },
     { name: 'Check-In', path: '/check-in' },
     { name: 'View Requirements', path: '/view-requirements/fetch' },
-    { name: 'Pend Comp. List', path: '/pending-components' }
+    { name: 'Pend Comp. List', path: '/pending-components' },
+    { name: 'Generate Reports', path: '/generate-reports' }
   ];
 
   const handleLogout = () => {

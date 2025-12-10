@@ -1,21 +1,21 @@
 const express = require('express');
-const cors = require('cors');  // Import CORS package
+const cors = require('cors');
 const app = express();
-
 require("dotenv").config();
-const PORT = process.env.PORT || 4000;  // Added `const` for PORT
 
-// Enable CORS for all origins (or specify a list of allowed origins)
-app.use(cors());  // Allow all origins for now, or use cors({ origin: 'http://localhost:3000' }) to allow only your frontend
-
-// Middleware to parse JSON request bodies
-// Middleware to parse JSON request bodies
+// Middleware
+app.use(cors());
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 app.use('/uploads', express.static('uploads'));
 
-// Import routes for API
+// Routes
+const certificateRoutes = require('./routes/certificateRoutes');
 const Routes = require("./routes/routes");
-app.use("/api/v1", Routes);  // Mount your routes here
+
+app.use('/api/v1', certificateRoutes);
+app.use("/api/v1", Routes);
+
 
 // 404 Handler
 app.use((req, res, next) => {
@@ -33,7 +33,18 @@ app.use(errorHandler);
 const dbConnect = require("./config/database");
 dbConnect();
 
+// Cron Job for Auto-Incrementing Student Years
+const cron = require('node-cron');
+const User = require('./models/User');
+
+// Schedule task to run at 00:00 on June 15th
+cron.schedule('0 0 15 6 *', () => {
+    console.log("Running yearly student year increment task...");
+    User.incrementStudentYears();
+});
+
 // Start the server (✅ Only once)
+const PORT = process.env.PORT || 4000;
 app.listen(PORT, () => {
     console.log(`Server Started!! at port ${PORT}`);
 });

@@ -5,7 +5,7 @@ const router = express.Router();
 const { auth, authorizeRole, getUserEmail } = require('../middlewares');
 
 // Auth controllers
-const { login, signUp, verifyOTP, getCurrentUser, verifyToken, sendOTP, sendInstructioMail, changePassword } = require("../controllers/Auth");
+const { login, signUp, verifyOTP, getCurrentUser, verifyToken, sendOTP, sendInstructioMail, changePassword, createInstructor } = require("../controllers/Auth");
 
 // Project Controllers
 const { createProject, getAllProjects, getAllUsers, getUserProjects, updateProjectApproval, updateProjectComponents, projectReturn, getGuidedProjects, uploadReport, sendReportForApproval, updateReportStatus } = require("../controllers/Project");
@@ -24,6 +24,8 @@ const { getControls, updateControls } = require('../controllers/Controls');
 const { addToSlot, getTokenProject, updateDelivery, checkInVerify } = require('../controllers/Distribution');
 const { uploadFile } = require('../controllers/FileHandler');
 const { getPendingComponents } = require('../controllers/PendingComponents');
+const { generateStockReport } = require('../controllers/StockReportController');
+const { generateProjectReport } = require('../controllers/ProjectReportController');
 // --- Auth Routes ---
 router.post("/login", login);
 router.post("/signup", signUp);
@@ -34,6 +36,7 @@ router.get("/verify-token", verifyToken);
 router.post("/auth/sendotp", sendOTP);
 router.post("/auth/forgot-pass", getUserEmail, sendInstructioMail);
 router.post("/auth/reset-password", changePassword);
+router.post("/create-instructor", auth, authorizeRole("Admin"), createInstructor);
 // --- Component Routes ---
 router.post("/create-component", auth, createComponent);
 router.post("/create-component/form", auth, createComponentInForm);
@@ -65,6 +68,13 @@ router.put('/update-project-components/:projectId', auth, updateProjectComponent
 router.post("/projects/:projectId/report/upload", auth, uploadReport);
 router.post("/projects/:projectId/report/send", auth, sendReportForApproval);
 router.put("/projects/:projectId/report/:reportNumber/status", auth, updateReportStatus);
+
+// Stock Report Route
+router.post("/generate-stock-report", auth, authorizeRole("Manager", "Admin"), generateStockReport);
+
+// Project Report Route (Granular)
+router.post("/generate-project-report", auth, authorizeRole("Manager", "Admin"), generateProjectReport);
+
 // Optional: Future Protected Controls
 // router.put("/get-controls", auth, authorizeRole("Instructor"), yourController);
 
@@ -83,7 +93,7 @@ router.get("/get-cart/:cartID", auth, getCart);
 router.put("/update-cart", auth, updateCart);
 router.put('/cart/checkin/:id', auth, checkInCart);
 router.put('/add-to-slots', auth, addToSlot);
-router.get('/verify/get-project/:token', auth, getTokenProject);
+router.get('/verify/get-project/:token', getTokenProject);
 router.post('/verify/success', auth, updateDelivery);
 router.put('/check-in/verify', auth, checkInVerify);
 router.put('/check-in/project', auth, projectReturn);
