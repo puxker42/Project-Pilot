@@ -4,11 +4,28 @@ import TopBarWithLogo from './TopBarWithLogo';
 
 const BASE_URL = process.env.REACT_APP_API_BASE_URL;
 
+const YEAR_MAP = {
+  1: "First Year",
+  2: "Second Year",
+  3: "Third Year",
+  4: "Final Year"
+};
+
+const BATCH_MAP = {
+  1: "EN-1",
+  2: "EN-2",
+  3: "EN-3",
+  4: "EN-4",
+  5: "EN-5",
+  6: "EN-6"
+};
+
 const GuidedProjects = () => {
   const [projects, setProjects] = useState([]);
   const [filteredProjects, setFilteredProjects] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [batchFilter, setBatchFilter] = useState('All');
+  const [yearFilter, setYearFilter] = useState('All');
   const [selectedProject, setSelectedProject] = useState(null);
 
   useEffect(() => {
@@ -35,9 +52,15 @@ const GuidedProjects = () => {
 
   useEffect(() => {
     let temp = [...projects];
+
     if (batchFilter !== 'All') {
       temp = temp.filter(p => p.batch === parseInt(batchFilter));
     }
+
+    if (yearFilter !== 'All') {
+      temp = temp.filter(p => p.year === parseInt(yearFilter));
+    }
+
     if (searchTerm) {
       temp = temp.filter(p =>
         p.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -45,11 +68,11 @@ const GuidedProjects = () => {
       );
     }
     setFilteredProjects(temp);
-  }, [searchTerm, batchFilter, projects]);
+  }, [searchTerm, batchFilter, yearFilter, projects]);
 
   return (
     <div>
-      <TopBarWithLogo title='Guided Projects'/>
+      <TopBarWithLogo title='Guided Projects' />
 
       <div className="guided-projects-container">
         <div className="filters">
@@ -59,6 +82,13 @@ const GuidedProjects = () => {
             value={searchTerm}
             onChange={e => setSearchTerm(e.target.value)}
           />
+          <select value={yearFilter} onChange={e => setYearFilter(e.target.value)}>
+            <option value="All">All Years</option>
+            <option value="1">First Year</option>
+            <option value="2">Second Year</option>
+            <option value="3">Third Year</option>
+            <option value="4">Final Year</option>
+          </select>
           <select value={batchFilter} onChange={e => setBatchFilter(e.target.value)}>
             <option value="All">All Batches</option>
             <option value="1">EN-1</option>
@@ -76,6 +106,7 @@ const GuidedProjects = () => {
                 <th>ID</th>
                 <th>Title</th>
                 <th>Type</th>
+                <th>Year</th>
                 <th>Batch</th>
                 <th>Approved</th>
                 <th>Status</th>
@@ -88,7 +119,8 @@ const GuidedProjects = () => {
                   <td>{project.ID}</td>
                   <td>{project.title}</td>
                   <td>{project.type}</td>
-                  <td>{project.batch}</td>
+                  <td>{YEAR_MAP[project.year] || 'N/A'}</td>
+                  <td>{BATCH_MAP[project.batch] || project.batch || 'N/A'}</td>
                   <td>
                     <span className={`badge ${project.approved ? 'approved' : 'not-approved'}`}>
                       {project.approved ? 'Yes' : 'No'}

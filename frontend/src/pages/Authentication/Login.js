@@ -38,6 +38,11 @@ function Login() {
             navigate(`/admin-dashboard${tokenParam}`);
             localStorage.setItem('homePath', `/admin-dashboard${tokenParam}`);
             break;
+          case 'Developer':
+            // Hide existence of developer account on main login
+            console.log('Login failed: Invalid role for this portal');
+            navigate('/log-fail');
+            break;
           case 'Manager':
             navigate(`/manager-dashboard${tokenParam}`);
             localStorage.setItem('homePath', `/manager-dashboard${tokenParam}`);
@@ -45,6 +50,10 @@ function Login() {
           case 'Instructor':
             navigate(`/instructor-dashboard${tokenParam}`);
             localStorage.setItem('homePath', `/instructor-dashboard${tokenParam}`);
+            break;
+          case 'Developer':
+            navigate(`/developer-dashboard${tokenParam}`);
+            localStorage.setItem('homePath', `/developer-dashboard${tokenParam}`);
             break;
           default:
             navigate(`/student-dashboard${tokenParam}`);

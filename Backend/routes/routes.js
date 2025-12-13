@@ -5,7 +5,7 @@ const router = express.Router();
 const { auth, authorizeRole, getUserEmail } = require('../middlewares');
 
 // Auth controllers
-const { login, signUp, verifyOTP, getCurrentUser, verifyToken, sendOTP, sendInstructioMail, changePassword, createInstructor } = require("../controllers/Auth");
+const { login, signUp, verifyOTP, getCurrentUser, verifyToken, sendOTP, sendInstructioMail, changePassword, createInstructor, createAdmin, createStudentDirect } = require("../controllers/Auth");
 
 // Project Controllers
 const { createProject, getAllProjects, getAllUsers, getUserProjects, updateProjectApproval, updateProjectComponents, projectReturn, getGuidedProjects, uploadReport, sendReportForApproval, updateReportStatus } = require("../controllers/Project");
@@ -26,6 +26,7 @@ const { uploadFile } = require('../controllers/FileHandler');
 const { getPendingComponents } = require('../controllers/PendingComponents');
 const { generateStockReport } = require('../controllers/StockReportController');
 const { generateProjectReport } = require('../controllers/ProjectReportController');
+const { getModelData, getAvailableModels } = require('../controllers/DeveloperController');
 // --- Auth Routes ---
 router.post("/login", login);
 router.post("/signup", signUp);
@@ -36,7 +37,9 @@ router.get("/verify-token", verifyToken);
 router.post("/auth/sendotp", sendOTP);
 router.post("/auth/forgot-pass", getUserEmail, sendInstructioMail);
 router.post("/auth/reset-password", changePassword);
-router.post("/create-instructor", auth, authorizeRole("Admin"), createInstructor);
+router.post("/create-instructor", auth, authorizeRole("Admin", "Developer"), createInstructor);
+router.post("/create-admin", auth, authorizeRole("Developer"), createAdmin);
+router.post("/create-student-direct", auth, authorizeRole("Developer"), createStudentDirect);
 // --- Component Routes ---
 router.post("/create-component", auth, createComponent);
 router.post("/create-component/form", auth, createComponentInForm);
@@ -108,6 +111,10 @@ router.get("/get-all-vendors", auth, getAllVendors);
 
 // --- File Routes ---
 router.post("/upload", auth, uploadFile);
+
+// --- Developer Routes ---
+router.get("/developer/models", auth, authorizeRole("Developer"), getAvailableModels);
+router.get("/developer/data/:modelName", auth, authorizeRole("Developer"), getModelData);
 
 // In your Express backend
 const Order = require('../models/Order');

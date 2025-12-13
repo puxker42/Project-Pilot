@@ -2,16 +2,9 @@ import React, { useState, useEffect } from 'react';
 import TopBarWithlogo from '../TopBarWithLogo';
 import {
   Box,
-  Container,
   TextField,
   Button,
   Typography,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
   IconButton,
   Chip,
   FormControlLabel,
@@ -21,12 +14,19 @@ import {
   Alert,
   Snackbar,
   CircularProgress,
-  Divider,
   Paper,
   Card,
   CardContent,
-  Fade,
-  Tooltip
+  List,
+  ListItem,
+  ListItemText,
+  ListItemAvatar,
+  Avatar,
+  ListItemSecondaryAction,
+  Divider,
+  Stack,
+  useTheme,
+  useMediaQuery
 } from '@mui/material';
 import {
   Add as AddIcon,
@@ -35,8 +35,11 @@ import {
   Group as GroupIcon,
   Person as PersonIcon,
   PersonAdd as PersonAddIcon,
-  CheckCircle as CheckCircleIcon
+  CheckCircle as CheckCircleIcon,
+  School as SchoolIcon,
+  Badge as BadgeIcon
 } from '@mui/icons-material';
+import { motion, AnimatePresence } from 'framer-motion';
 
 const BASE_URL = process.env.REACT_APP_API_BASE_URL;
 
@@ -44,6 +47,24 @@ function generateTEMCode() {
   const randomNumber = Math.floor(1000 + Math.random() * 9000);
   return "TEM" + randomNumber;
 }
+
+// Animation Variants
+const containerVariants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.1,
+      when: "beforeChildren"
+    }
+  }
+};
+
+const itemVariants = {
+  hidden: { y: 20, opacity: 0 },
+  visible: { y: 0, opacity: 1, transition: { type: 'spring', stiffness: 300, damping: 24 } },
+  exit: { opacity: 0, scale: 0.95, transition: { duration: 0.2 } }
+};
 
 async function getUserData() {
   try {
@@ -78,6 +99,9 @@ const CreateTeam = () => {
   const [loading, setLoading] = useState(true);
   const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' });
 
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
+
   useEffect(() => {
     async function fetchData() {
       const data = await getUserData();
@@ -91,7 +115,8 @@ const CreateTeam = () => {
           userID: data.ID,
           firstName: data.name.split(' ')[0] || data.name,
           lastName: data.name.split(' ')[1] || '',
-          role: 'Lead'
+          role: 'Lead',
+          batch: data.batch
         }]);
       }
     }
@@ -199,450 +224,374 @@ const CreateTeam = () => {
       <>
         <TopBarWithlogo title='Create New Team' />
         <Box display="flex" justifyContent="center" alignItems="center" minHeight="80vh">
-          <Box textAlign="center">
-            <CircularProgress size={60} sx={{ color: '#8B2E2E' }} />
-            <Typography variant="body1" color="text.secondary" sx={{ mt: 2 }}>
-              Loading team builder...
-            </Typography>
-          </Box>
+          <CircularProgress size={60} sx={{ color: '#1a004b' }} />
         </Box>
       </>
     );
   }
 
+  // Calculate stats
+  const teamSize = teamMembers.length;
+  // Assuming a max team size for visual indicator (e.g. 4 or 5)
+  const maxTeamSize = 4;
+  const isTeamFull = teamSize >= maxTeamSize;
+
   return (
-    <Box sx={{ bgcolor: 'linear-gradient(135deg, #f5f5f5 0%, #fafafa 100%)', minHeight: '100vh' }}>
+    <Box sx={{
+      height: { xs: 'auto', md: '100vh' },
+      display: 'flex',
+      flexDirection: 'column',
+      bgcolor: '#f8f9fa'
+    }}>
       <TopBarWithlogo title='Create New Team' />
 
-      <Container maxWidth="xl" sx={{ py: 4 }}>
-        <Fade in={true} timeout={800}>
-          <Paper
-            elevation={0}
-            sx={{
-              p: 4,
-              borderRadius: 3,
-              boxShadow: '0 4px 20px rgba(0,0,0,0.08)',
-              border: '1px solid #e0e0e0'
-            }}
-          >
+      {/* Main Content Area */}
+      <Box
+        component={motion.div}
+        variants={containerVariants}
+        initial="hidden"
+        animate="visible"
+        sx={{
+          flex: 1,
+          overflow: { xs: 'visible', md: 'hidden' },
+          p: { xs: 1, md: 2 },
+          display: 'flex',
+          flexDirection: { xs: 'column', md: 'row' },
+          gap: 2,
+          maxWidth: '1800px',
+          width: '100%',
+          margin: '0 auto',
+          boxSizing: 'border-box'
+        }}
+      >
 
-
-            {/* Team Information Section */}
-            <Card
-              elevation={0}
-              sx={{
-                mb: 4,
-                bgcolor: 'rgba(139, 46, 46, 0.03)',
-                border: '2px solid rgba(139, 46, 46, 0.1)',
-                borderRadius: 2
-              }}
-            >
-              <CardContent>
-                <Typography
-                  variant="h6"
-                  fontWeight="600"
-                  gutterBottom
-                  sx={{ mb: 3, color: '#8B2E2E', display: 'flex', alignItems: 'center' }}
-                >
-                  <CheckCircleIcon sx={{ mr: 1 }} />
-                  Team Information
+        {/* LEFT PANE: Available Students */}
+        <Paper
+          component={motion.div}
+          variants={itemVariants}
+          elevation={0}
+          sx={{
+            flex: 1,
+            display: 'flex',
+            flexDirection: 'column',
+            borderRadius: 3,
+            border: '1px solid #e0e0e0',
+            overflow: 'hidden',
+            bgcolor: '#ffffff',
+            minHeight: { xs: '500px', md: 'auto' }
+          }}
+        >
+          {/* Header */}
+          <Box sx={{ p: 2, borderBottom: '1px solid #f0f0f0', bgcolor: '#fff' }}>
+            <Box display="flex" alignItems="center" mb={2}>
+              <Avatar sx={{ bgcolor: 'rgba(26, 0, 75, 0.1)', color: '#1a004b', mr: 2 }}>
+                <PersonAddIcon />
+              </Avatar>
+              <Box>
+                <Typography variant="h6" fontWeight="700" color="#1a1a1a">
+                  Available Students
                 </Typography>
-                <Grid container spacing={3}>
-                  <Grid item xs={12} md={5}>
-                    <TextField
-                      fullWidth
-                      label="Team Name"
-                      value={teamName}
-                      onChange={e => setTeamName(e.target.value)}
-                      variant="outlined"
-                      required
-                      placeholder="Enter a creative team name"
-                      sx={{
-                        '& .MuiOutlinedInput-root': {
-                          borderRadius: 2,
-                          bgcolor: '#fff',
-                          '&:hover fieldset': {
-                            borderColor: '#8B2E2E',
-                          },
-                          '&.Mui-focused fieldset': {
-                            borderColor: '#8B2E2E',
-                          }
-                        },
-                        '& .MuiInputLabel-root.Mui-focused': {
-                          color: '#8B2E2E'
-                        }
-                      }}
-                    />
-                  </Grid>
-                  <Grid item xs={12} md={4}>
-                    <TextField
-                      fullWidth
-                      label="Team ID"
-                      value={teamID}
-                      variant="outlined"
-                      InputProps={{
-                        readOnly: true,
-                      }}
-                      sx={{
-                        '& .MuiOutlinedInput-root': {
-                          borderRadius: 2,
-                          bgcolor: '#f9fafb',
-                        }
-                      }}
-                    />
-                  </Grid>
-                  <Grid item xs={12} md={3} display="flex" alignItems="center">
-                    <FormControlLabel
-                      control={
-                        <Checkbox
-                          checked={crossBatch}
-                          onChange={() => setCrossBatch(!crossBatch)}
-                          sx={{
-                            color: '#8B2E2E',
-                            '&.Mui-checked': {
-                              color: '#8B2E2E',
-                            }
-                          }}
-                        />
-                      }
-                      label={
-                        <Typography variant="body2" fontWeight="500">
-                          Allow Cross-Batch
-                        </Typography>
-                      }
-                    />
-                  </Grid>
-                </Grid>
-              </CardContent>
-            </Card>
+                <Typography variant="caption" color="text.secondary">
+                  Found {filteredMembers.length} eligible students
+                </Typography>
+              </Box>
+            </Box>
 
-            {/* Two Column Layout */}
-            <Grid container spacing={3}>
-              {/* Left Column - Search Students */}
-              <Grid item xs={12} lg={6}>
-                <Card
-                  elevation={0}
-                  sx={{
-                    border: '1px solid #e0e0e0',
-                    borderRadius: 2,
-                    height: '100%'
-                  }}
-                >
-                  <CardContent>
-                    <Box sx={{ mb: 3 }}>
-                      <Typography
-                        variant="h6"
-                        fontWeight="600"
-                        gutterBottom
-                        display="flex"
-                        alignItems="center"
-                        sx={{ color: '#333' }}
+            <TextField
+              fullWidth
+              placeholder="Search by name or PRN..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              variant="outlined"
+              size="small"
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <SearchIcon sx={{ color: 'text.secondary' }} />
+                  </InputAdornment>
+                ),
+              }}
+              sx={{
+                '& .MuiOutlinedInput-root': {
+                  borderRadius: 2,
+                  bgcolor: '#f9f9f9',
+                  '& fieldset': { borderColor: 'transparent' },
+                  '&:hover fieldset': { borderColor: '#e0e0e0' },
+                  '&.Mui-focused fieldset': { borderColor: '#1a004b' }
+                }
+              }}
+            />
+          </Box>
+
+          {/* Scrollable List */}
+          <Box sx={{ flex: 1, overflowY: 'auto' }}>
+            {filteredMembers.length > 0 ? (
+              <List sx={{ p: 0 }}>
+                <AnimatePresence>
+                  {filteredMembers.map((user) => (
+                    <motion.div
+                      key={user.userID}
+                      variants={itemVariants}
+                      initial="hidden"
+                      animate="visible"
+                      exit="exit"
+                      layout
+                    >
+                      <ListItem
+                        button
+                        onClick={() => handleAddMember(user)}
+                        disabled={isTeamFull}
+                        sx={{
+                          py: 1.5,
+                          px: 2,
+                          transition: 'all 0.2s',
+                          '&:hover': { bgcolor: 'rgba(26, 0, 75, 0.04)' },
+                          bgcolor: 'white'
+                        }}
                       >
-                        <PersonAddIcon sx={{ mr: 1, color: '#8B2E2E' }} />
-                        Available Students
-                      </Typography>
-                      <Typography variant="body2" color="text.secondary">
-                        Search and add students to your team
-                      </Typography>
-                    </Box>
-
-                    <TextField
-                      fullWidth
-                      placeholder="Search by name or PRN..."
-                      value={search}
-                      onChange={(e) => setSearch(e.target.value)}
-                      variant="outlined"
-                      size="medium"
-                      sx={{
-                        mb: 3,
-                        '& .MuiOutlinedInput-root': {
-                          borderRadius: 3,
-                          bgcolor: '#f9fafb',
-                          '&:hover fieldset': {
-                            borderColor: '#8B2E2E',
-                          },
-                          '&.Mui-focused fieldset': {
-                            borderColor: '#8B2E2E',
+                        <ListItemAvatar>
+                          <Avatar sx={{ bgcolor: '#e0e0e0', color: '#555', fontSize: '0.9rem', fontWeight: 'bold' }}>
+                            {user.firstName[0]}{user.lastName[0]}
+                          </Avatar>
+                        </ListItemAvatar>
+                        <ListItemText
+                          primary={
+                            <Typography variant="subtitle2" fontWeight="600" color="#333">
+                              {user.firstName} {user.lastName}
+                            </Typography>
                           }
-                        }
-                      }}
-                      InputProps={{
-                        startAdornment: (
-                          <InputAdornment position="start">
-                            <SearchIcon sx={{ color: '#8B2E2E' }} />
-                          </InputAdornment>
-                        ),
-                      }}
-                    />
-
-                    <Box
-                      sx={{
-                        maxHeight: 400,
-                        overflowY: 'auto',
-                        pr: 1,
-                        '&::-webkit-scrollbar': { width: '8px' },
-                        '&::-webkit-scrollbar-track': { background: '#f1f1f1', borderRadius: '10px' },
-                        '&::-webkit-scrollbar-thumb': { background: '#8B2E2E', borderRadius: '10px' },
-                        '&::-webkit-scrollbar-thumb:hover': { background: '#6B1E1E' }
-                      }}
-                    >
-                      <Grid container spacing={2}>
-                        {filteredMembers.map(user => (
-                          <Grid item xs={12} sm={6} key={user.userID}>
-                            <Card
-                              variant="outlined"
-                              sx={{
-                                height: '100%',
-                                borderRadius: 2,
-                                transition: 'all 0.2s',
-                                '&:hover': {
-                                  borderColor: '#8B2E2E',
-                                  bgcolor: 'rgba(139, 46, 46, 0.02)',
-                                  boxShadow: '0 4px 12px rgba(0,0,0,0.05)'
-                                }
-                              }}
-                            >
-                              <CardContent sx={{ p: 2, '&:last-child': { pb: 2 } }}>
-                                <Box display="flex" justifyContent="space-between" alignItems="flex-start">
-                                  <Box>
-                                    <Typography variant="subtitle2" fontWeight="700" color="#333" noWrap>
-                                      {user.firstName} {user.lastName}
-                                    </Typography>
-                                    <Typography variant="caption" color="text.secondary" sx={{ fontFamily: 'monospace', display: 'block', mt: 0.5 }}>
-                                      {user.userID}
-                                    </Typography>
-                                  </Box>
-                                  <Tooltip title="Add to team" arrow>
-                                    <IconButton
-                                      size="small"
-                                      onClick={() => handleAddMember(user)}
-                                      sx={{
-                                        color: '#8B2E2E',
-                                        bgcolor: 'rgba(139, 46, 46, 0.05)',
-                                        '&:hover': {
-                                          bgcolor: '#8B2E2E',
-                                          color: 'white'
-                                        }
-                                      }}
-                                    >
-                                      <AddIcon fontSize="small" />
-                                    </IconButton>
-                                  </Tooltip>
-                                </Box>
-                                <Box mt={1.5}>
-                                  <Chip
-                                    label={`EN${user.batch}`}
-                                    size="small"
-                                    sx={{
-                                      height: 20,
-                                      fontSize: '0.7rem',
-                                      bgcolor: 'rgba(139, 46, 46, 0.1)',
-                                      color: '#8B2E2E',
-                                      fontWeight: '600'
-                                    }}
-                                  />
-                                </Box>
-                              </CardContent>
-                            </Card>
-                          </Grid>
-                        ))}
-                        {filteredMembers.length === 0 && (
-                          <Grid item xs={12}>
-                            <Box textAlign="center" py={6}>
-                              <SearchIcon sx={{ fontSize: 48, color: '#ccc', mb: 1 }} />
-                              <Typography variant="body2" color="text.secondary">
-                                No matching students found
-                              </Typography>
-                            </Box>
-                          </Grid>
-                        )}
-                      </Grid>
-                    </Box>
-                  </CardContent>
-                </Card>
-              </Grid>
-
-              {/* Right Column - Team Members */}
-              <Grid item xs={12} lg={6}>
-                <Card
-                  elevation={0}
-                  sx={{
-                    border: '2px solid #8B2E2E',
-                    borderRadius: 2,
-                    height: '100%',
-                    bgcolor: 'rgba(139, 46, 46, 0.02)'
-                  }}
-                >
-                  <CardContent>
-                    <Box sx={{ mb: 3 }}>
-                      <Box display="flex" alignItems="center" justifyContent="space-between">
-                        <Box>
-                          <Typography
-                            variant="h6"
-                            fontWeight="600"
-                            gutterBottom
-                            display="flex"
-                            alignItems="center"
-                            sx={{ color: '#8B2E2E' }}
-                          >
-                            <PersonIcon sx={{ mr: 1 }} />
-                            Your Team Members
-                          </Typography>
-                          <Typography variant="body2" color="text.secondary">
-                            Current team composition
-                          </Typography>
-                        </Box>
-                        <Chip
-                          label={`${teamMembers.length} ${teamMembers.length !== 1 ? 'Members' : 'Member'}`}
-                          sx={{
-                            bgcolor: '#8B2E2E',
-                            color: '#fff',
-                            fontWeight: '700',
-                            fontSize: '0.9rem',
-                            px: 1
-                          }}
+                          secondary={
+                            <Stack direction="row" spacing={1} alignItems="center" mt={0.5}>
+                              <Box display="flex" alignItems="center" sx={{ bgcolor: '#f0f0f0', px: 0.8, py: 0.2, borderRadius: 1 }}>
+                                <BadgeIcon sx={{ fontSize: 12, mr: 0.5, color: '#666' }} />
+                                <Typography variant="caption" color="#555" fontWeight="500">{user.userID}</Typography>
+                              </Box>
+                              <Box display="flex" alignItems="center" sx={{ bgcolor: 'rgba(26, 0, 75, 0.08)', px: 0.8, py: 0.2, borderRadius: 1 }}>
+                                <SchoolIcon sx={{ fontSize: 12, mr: 0.5, color: '#1a004b' }} />
+                                <Typography variant="caption" color="#1a004b" fontWeight="600">EN{user.batch}</Typography>
+                              </Box>
+                            </Stack>
+                          }
                         />
-                      </Box>
-                    </Box>
-
-                    <TableContainer
-                      sx={{
-                        maxHeight: 450,
-                        border: '1px solid #e0e0e0',
-                        borderRadius: 2,
-                        bgcolor: '#fff',
-                        '&::-webkit-scrollbar': {
-                          width: '8px',
-                        },
-                        '&::-webkit-scrollbar-track': {
-                          background: '#f1f1f1',
-                          borderRadius: '10px',
-                        },
-                        '&::-webkit-scrollbar-thumb': {
-                          background: '#8B2E2E',
-                          borderRadius: '10px',
-                        },
-                        '&::-webkit-scrollbar-thumb:hover': {
-                          background: '#6B1E1E',
-                        }
-                      }}
-                    >
-                      <Table stickyHeader size="small">
-                        <TableHead>
-                          <TableRow>
-                            <TableCell sx={{ fontWeight: 'bold', bgcolor: '#8B2E2E', color: '#fff' }}>
-                              ID
-                            </TableCell>
-                            <TableCell sx={{ fontWeight: 'bold', bgcolor: '#8B2E2E', color: '#fff' }}>
-                              Name
-                            </TableCell>
-                            <TableCell sx={{ fontWeight: 'bold', bgcolor: '#8B2E2E', color: '#fff' }}>
-                              Role
-                            </TableCell>
-                            <TableCell align="center" sx={{ fontWeight: 'bold', bgcolor: '#8B2E2E', color: '#fff' }}>
-                              Action
-                            </TableCell>
-                          </TableRow>
-                        </TableHead>
-                        <TableBody>
-                          {teamMembers.map(member => (
-                            <TableRow
-                              key={member.userID}
-                              hover
+                        <ListItemSecondaryAction>
+                          <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }}>
+                            <IconButton
+                              edge="end"
+                              onClick={() => handleAddMember(user)}
+                              disabled={isTeamFull}
                               sx={{
-                                '&:hover': {
-                                  bgcolor: 'rgba(139, 46, 46, 0.05)'
-                                }
+                                color: isTeamFull ? '#ccc' : '#1a004b',
+                                bgcolor: isTeamFull ? 'transparent' : 'rgba(26, 0, 75, 0.05)',
+                                '&:hover': { bgcolor: isTeamFull ? 'transparent' : '#1a004b', color: 'white' }
                               }}
                             >
-                              <TableCell sx={{ fontWeight: '500' }}>{member.userID}</TableCell>
-                              <TableCell>{member.firstName} {member.lastName}</TableCell>
-                              <TableCell>
-                                <Chip
-                                  label={member.role}
-                                  size="small"
-                                  sx={member.role === 'Lead' ? {
-                                    bgcolor: '#4caf50',
-                                    color: '#fff',
-                                    fontWeight: '600'
-                                  } : {
-                                    bgcolor: '#e0e0e0',
-                                    color: '#555',
-                                    fontWeight: '600'
-                                  }}
-                                />
-                              </TableCell>
-                              <TableCell align="center">
-                                {member.userID !== uID ? (
-                                  <Tooltip title="Remove from team" arrow>
-                                    <IconButton
-                                      size="small"
-                                      onClick={() => handleRemoveMember(member.userID)}
-                                      sx={{
-                                        color: '#d32f2f',
-                                        '&:hover': {
-                                          bgcolor: 'rgba(211, 47, 47, 0.1)',
-                                          transform: 'scale(1.1)'
-                                        },
-                                        transition: 'all 0.2s'
-                                      }}
-                                    >
-                                      <RemoveIcon />
-                                    </IconButton>
-                                  </Tooltip>
-                                ) : (
-                                  <Chip
-                                    label="Team Lead"
-                                    size="small"
-                                    sx={{
-                                      bgcolor: 'rgba(76, 175, 80, 0.1)',
-                                      color: '#4caf50',
-                                      fontWeight: '600',
-                                      fontSize: '0.7rem'
-                                    }}
-                                  />
-                                )}
-                              </TableCell>
-                            </TableRow>
-                          ))}
-                        </TableBody>
-                      </Table>
-                    </TableContainer>
-                  </CardContent>
-                </Card>
+                              <AddIcon />
+                            </IconButton>
+                          </motion.div>
+                        </ListItemSecondaryAction>
+                      </ListItem>
+                      <Divider component="li" />
+                    </motion.div>
+                  ))}
+                </AnimatePresence>
+              </List>
+            ) : (
+              <Box display="flex" flexDirection="column" alignItems="center" justifyContent="center" height="100%" sx={{ opacity: 0.6 }}>
+                <SearchIcon sx={{ fontSize: 60, mb: 2, color: '#ddd' }} />
+                <Typography variant="body1" color="text.secondary">No students found</Typography>
+              </Box>
+            )}
+          </Box>
+        </Paper>
+
+        {/* RIGHT PANE: Team Details */}
+        <Paper
+          component={motion.div}
+          variants={itemVariants}
+          elevation={0}
+          sx={{
+            flex: 1,
+            display: 'flex',
+            flexDirection: 'column',
+            borderRadius: 3,
+            border: '2px solid rgba(26, 0, 75, 0.15)',
+            overflow: 'hidden',
+            bgcolor: '#ffffff',
+            position: 'relative',
+            minHeight: { xs: 'auto', md: 'auto' }
+          }}
+        >
+          {/* Top Background Decoration */}
+          <Box sx={{
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            right: 0,
+            height: '6px',
+            background: 'linear-gradient(90deg, #1a004b 0%, #2e008b 100%)'
+          }} />
+
+          {/* Team Settings Header */}
+          <Box sx={{ p: 3, borderBottom: '1px solid #f0f0f0' }}>
+            <Box mb={3}>
+              <Typography variant="h6" fontWeight="700" color="#1a004b" gutterBottom>
+                Team Configuration
+              </Typography>
+              <Typography variant="body2" color="text.secondary">
+                Define your team identity and structure
+              </Typography>
+            </Box>
+
+            <Grid container spacing={2}>
+              <Grid item xs={12} md={7}>
+                <TextField
+                  fullWidth
+                  label="Team Name"
+                  value={teamName}
+                  onChange={e => setTeamName(e.target.value)}
+                  variant="outlined"
+                  size="small"
+                  placeholder="e.g. Code Masters"
+                  sx={{
+                    '& .MuiInputLabel-root.Mui-focused': { color: '#1a004b' },
+                    '& .MuiOutlinedInput-root.Mui-focused fieldset': { borderColor: '#1a004b' }
+                  }}
+                />
+              </Grid>
+              <Grid item xs={12} md={5}>
+                <TextField
+                  fullWidth
+                  label="Team ID"
+                  value={teamID}
+                  size="small"
+                  InputProps={{ readOnly: true, startAdornment: <InputAdornment position="start">#</InputAdornment> }}
+                  sx={{ bgcolor: '#f9f9f9', borderRadius: 1 }}
+                />
               </Grid>
             </Grid>
 
-            {/* Action Button */}
-            <Box display="flex" justifyContent="center" sx={{ mt: 5 }}>
+            <Box display="flex" justifyContent="space-between" alignItems="center" mt={2}>
+              <FormControlLabel
+                control={
+                  <Checkbox
+                    checked={crossBatch}
+                    onChange={() => setCrossBatch(!crossBatch)}
+                    size="small"
+                    sx={{ color: '#1a004b', '&.Mui-checked': { color: '#1a004b' } }}
+                  />
+                }
+                label={<Typography variant="body2" color="#555">Allow Cross-Batch Members</Typography>}
+              />
+              <Chip
+                label={`${teamMembers.length} / ${maxTeamSize} Members`}
+                size="small"
+                sx={{
+                  fontWeight: 600,
+                  bgcolor: isTeamFull ? '#ff9800' : '#e8f5e9',
+                  color: isTeamFull ? '#fff' : '#2e7d32'
+                }}
+              />
+            </Box>
+          </Box>
+
+          {/* Team Members List */}
+          <Box sx={{ flex: 1, overflowY: 'auto', bgcolor: '#fafafa', p: 2 }}>
+            {/* Lead Card */}
+            {teamMembers.filter(m => m.role === 'Lead').map(lead => (
+              <motion.div key={lead.userID} initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }}>
+                <Card variant="outlined" sx={{ mb: 2, borderColor: '#4caf50', bgcolor: '#f1f8e9' }}>
+                  <CardContent sx={{ p: '16px !important', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                    <Box display="flex" alignItems="center">
+                      <Avatar sx={{ bgcolor: '#4caf50', mr: 2 }}>L</Avatar>
+                      <Box>
+                        <Typography variant="subtitle1" fontWeight="700">{lead.firstName} {lead.lastName} (You)</Typography>
+                        <Typography variant="caption" color="text.secondary">Team Lead • {lead.userID}</Typography>
+                      </Box>
+                    </Box>
+                    <CheckCircleIcon sx={{ color: '#4caf50' }} />
+                  </CardContent>
+                </Card>
+              </motion.div>
+            ))}
+
+            {/* Member Cards */}
+            <Stack spacing={2}>
+              <AnimatePresence>
+                {teamMembers.filter(m => m.role !== 'Lead').map(member => (
+                  <motion.div
+                    key={member.userID}
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: 20 }}
+                    layout
+                  >
+                    <Card variant="outlined" sx={{
+                      transition: '0.2s',
+                      '&:hover': { borderColor: '#1a004b', boxShadow: '0 2px 8px rgba(0,0,0,0.05)' }
+                    }}>
+                      <CardContent sx={{ p: '12px 16px !important', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                        <Box display="flex" alignItems="center">
+                          <Avatar sx={{ width: 32, height: 32, bgcolor: '#1a004b', fontSize: '0.8rem', mr: 1.5 }}>
+                            {member.firstName[0]}
+                          </Avatar>
+                          <Box>
+                            <Typography variant="subtitle2" fontWeight="600">{member.firstName} {member.lastName}</Typography>
+                            <Typography variant="caption" color="text.secondary">{member.userID} • EN{member.batch}</Typography>
+                          </Box>
+                        </Box>
+                        <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }}>
+                          <IconButton
+                            size="small"
+                            onClick={() => handleRemoveMember(member.userID)}
+                            sx={{ color: '#d32f2f', bgcolor: 'rgba(211, 47, 47, 0.05)', '&:hover': { bgcolor: '#d32f2f', color: 'white' } }}
+                          >
+                            <RemoveIcon fontSize="small" />
+                          </IconButton>
+                        </motion.div>
+                      </CardContent>
+                    </Card>
+                  </motion.div>
+                ))}
+              </AnimatePresence>
+
+              {/* Empty Slots Guidelines */}
+              {teamMembers.length < 2 && (
+                <Box sx={{ p: 2, border: '1px dashed #ccc', borderRadius: 2, textAlign: 'center', mt: 2 }}>
+                  <Typography variant="body2" color="text.secondary">
+                    Add at least 1 more member to create a team.
+                  </Typography>
+                </Box>
+              )}
+            </Stack>
+          </Box>
+
+          {/* Fixed Bottom Action Area */}
+          <Box sx={{ p: 3, bgcolor: '#fff', borderTop: '1px solid #e0e0e0', textAlign: 'center' }}>
+            <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
               <Button
                 variant="contained"
+                fullWidth
                 size="large"
-                startIcon={<GroupIcon />}
                 onClick={handleCreateTeam}
+                disabled={teamMembers.length < 2 || !teamName.trim()}
+                startIcon={<GroupIcon />}
                 sx={{
-                  px: 10,
-                  py: 2,
-                  borderRadius: 3,
+                  py: 1.5,
+                  bgcolor: '#1a004b',
                   textTransform: 'none',
-                  fontSize: '1.1rem',
                   fontWeight: 'bold',
-                  bgcolor: '#8B2E2E',
-                  boxShadow: '0 6px 20px rgba(139, 46, 46, 0.3)',
-                  '&:hover': {
-                    bgcolor: '#6B1E1E',
-                    boxShadow: '0 8px 25px rgba(139, 46, 46, 0.4)',
-                    transform: 'translateY(-2px)'
-                  },
-                  transition: 'all 0.3s'
+                  fontSize: '1rem',
+                  borderRadius: 2,
+                  boxShadow: '0 4px 12px rgba(26, 0, 75, 0.2)',
+                  '&:hover': { bgcolor: '#0d0026', boxShadow: '0 6px 16px rgba(26, 0, 75, 0.3)' }
                 }}
               >
-                Create Team
+                Create Team Configuration
               </Button>
-            </Box>
-          </Paper>
-        </Fade>
-      </Container>
+            </motion.div>
+          </Box>
+        </Paper>
+      </Box>
 
       <Snackbar
         open={snackbar.open}
@@ -653,11 +602,7 @@ const CreateTeam = () => {
         <Alert
           onClose={() => setSnackbar({ ...snackbar, open: false })}
           severity={snackbar.severity}
-          sx={{
-            width: '100%',
-            borderRadius: 2,
-            fontWeight: '600'
-          }}
+          sx={{ width: '100%', borderRadius: 2, fontWeight: '600', boxShadow: '0 4px 20px rgba(0,0,0,0.1)' }}
         >
           {snackbar.message}
         </Alert>

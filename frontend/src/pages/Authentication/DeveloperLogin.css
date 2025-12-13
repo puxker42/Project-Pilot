@@ -1,0 +1,127 @@
+/* Dark Mode Login Styles */
+.login-container.developer-mode {
+    background-color: #0f0f1a;
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.login-card.developer-mode {
+    background-color: #16213e;
+    border: 1px solid #2a2a40;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+    display: flex;
+    width: 900px;
+    height: 550px;
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+.left-section.developer-mode {
+    background: linear-gradient(135deg, #0a0a12 0%, #1a1a2e 100%);
+    width: 45%;
+    padding: 40px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    border-right: 1px solid #2a2a40;
+    position: relative;
+    color: #e0e0e0;
+}
+
+.college-name.developer-mode {
+    font-size: 1.8rem;
+    font-weight: bold;
+    color: #ffffff;
+    margin: 20px 0;
+    text-align: center;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+.department-name.developer-mode {
+    color: #e74a3b;
+    font-weight: 600;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    font-size: 0.9rem;
+}
+
+.tool-name.developer-mode {
+    color: #858796;
+    font-size: 1rem;
+    margin-top: 5px;
+}
+
+.right-section.developer-mode {
+    width: 55%;
+    padding: 50px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    background-color: #16213e;
+}
+
+.form-title.developer-mode {
+    color: #ffffff;
+    font-size: 2rem;
+    margin-bottom: 5px;
+}
+
+.form-subtitle.developer-mode {
+    color: #858796;
+    margin-bottom: 30px;
+}
+
+.input-group.developer-mode {
+    margin-bottom: 20px;
+}
+
+.input-label.developer-mode {
+    display: block;
+    margin-bottom: 8px;
+    color: #b0b3c5;
+    font-size: 0.9rem;
+    font-weight: 500;
+}
+
+.form-input.developer-mode {
+    width: 100%;
+    padding: 12px 15px;
+    background-color: #0f0f1a;
+    border: 1px solid #2a2a40;
+    border-radius: 6px;
+    color: #ffffff;
+    font-size: 1rem;
+    transition: border-color 0.2s;
+}
+
+.form-input.developer-mode:focus {
+    outline: none;
+    border-color: #e74a3b;
+    box-shadow: 0 0 0 3px rgba(231, 74, 59, 0.2);
+}
+
+.login-button.developer-mode {
+    width: 100%;
+    padding: 12px;
+    background-color: #e74a3b;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-size: 1rem;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.2s, transform 0.1s;
+    margin-top: 10px;
+}
+
+.login-button.developer-mode:hover {
+    background-color: #c0392b;
+}
+
+.login-button.developer-mode:active {
+    transform: translateY(1px);
+}

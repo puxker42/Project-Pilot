@@ -118,53 +118,55 @@ const ReportUploadSlot = ({
                     </Box>
                 )}
 
-                {status === 'Approved' ? (
+                {status === 'Approved' && (
+                    <Box mb={2} p={1} bgcolor="#e8f5e9" borderRadius={1} border="1px solid #c8e6c9">
+                        <Typography variant="body2" color="success.dark" fontWeight="500">
+                            Report is approved. Uploading a new file will reset the approval status.
+                        </Typography>
+                    </Box>
+                )}
+
+                {status === 'Pending Approval' ? (
                     <Typography variant="body2" color="textSecondary">
-                        Report successfully approved.
+                        Waiting for instructor approval.
                     </Typography>
                 ) : (
                     <Box>
-                        {status === 'Pending Approval' ? (
-                            <Typography variant="body2" color="textSecondary">
-                                Waiting for instructor approval.
-                            </Typography>
-                        ) : (
-                            <Box display="flex" gap={2} alignItems="center">
-                                <input
-                                    accept=".pdf,.docx"
-                                    style={{ display: 'none' }}
-                                    id={`raised-button-file-${reportNumber}`}
-                                    type="file"
-                                    onChange={handleFileChange}
-                                    disabled={disabled}
-                                />
-                                <label htmlFor={`raised-button-file-${reportNumber}`}>
-                                    <Button variant="outlined" component="span" disabled={disabled}>
-                                        {selectedFile ? selectedFile.name : "Choose File"}
-                                    </Button>
-                                </label>
+                        <Box display="flex" gap={2} alignItems="center">
+                            <input
+                                accept=".pdf,.docx"
+                                style={{ display: 'none' }}
+                                id={`raised-button-file-${reportNumber}`}
+                                type="file"
+                                onChange={handleFileChange}
+                                disabled={disabled}
+                            />
+                            <label htmlFor={`raised-button-file-${reportNumber}`}>
+                                <Button variant="outlined" component="span" disabled={disabled}>
+                                    {selectedFile ? selectedFile.name : "Choose File"}
+                                </Button>
+                            </label>
+                            <Button
+                                variant="contained"
+                                color="primary"
+                                startIcon={uploading ? <CircularProgress size={20} color="inherit" /> : <CloudUpload />}
+                                onClick={handleUpload}
+                                disabled={!selectedFile || disabled || uploading}
+                            >
+                                {uploading ? "Uploading..." : "Upload"}
+                            </Button>
+
+                            {status === 'Uploaded - Not Sent' && (
                                 <Button
                                     variant="contained"
-                                    color="primary"
-                                    startIcon={uploading ? <CircularProgress size={20} color="inherit" /> : <CloudUpload />}
-                                    onClick={handleUpload}
-                                    disabled={!selectedFile || disabled || uploading}
+                                    color="warning"
+                                    endIcon={<Send />}
+                                    onClick={() => setConfirmOpen(true)}
                                 >
-                                    {uploading ? "Uploading..." : "Upload"}
+                                    Send for Approval
                                 </Button>
-
-                                {status === 'Uploaded - Not Sent' && (
-                                    <Button
-                                        variant="contained"
-                                        color="warning"
-                                        endIcon={<Send />}
-                                        onClick={() => setConfirmOpen(true)}
-                                    >
-                                        Send for Approval
-                                    </Button>
-                                )}
-                            </Box>
-                        )}
+                            )}
+                        </Box>
                     </Box>
                 )}
 

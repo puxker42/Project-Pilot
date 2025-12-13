@@ -150,14 +150,23 @@ const GenerateReports = () => {
             let head = [];
             let body = [];
 
-            if (stockReportType === 'current') {
-                head = [['ID', 'Name', 'Qty', 'Location', 'Available']];
+            if (stockReportType === 'current' || stockReportType === 'day_wise') {
+                head = [['ID', 'Name', 'Qty', 'Date', 'Available']];
                 body = getFilteredData().map(row => [
                     row.componentID,
                     row.name,
                     row.quantity,
-                    row.location || '-',
-                    row.available ? 'In Stock' : 'Out of Stock'
+                    new Date(row.date || Date.now()).toLocaleDateString(),
+                    row.available ? 'Available' : 'Out of Stock'
+                ]);
+            } else if (stockReportType === 'component_wise') {
+                head = [['ID', 'Name', 'Total IN', 'Total OUT', 'Current Stock']];
+                body = getFilteredData().map(row => [
+                    row.componentID,
+                    row.name,
+                    row.totalIn,
+                    row.totalOut,
+                    row.currentStock
                 ]);
             } else if (stockReportType === 'requirements') {
                 head = [['ID', 'Name', 'Required', 'Available', 'Ordered', 'To Order']];
@@ -435,9 +444,9 @@ const GenerateReports = () => {
     const renderFilterDropdown = (columnKey, placeholder) => {
         const options = getUniqueOptions(columnKey);
         return (
-            <div className="filter-input-wrapper">
+            <div className="gen-rep-filter-wrapper">
                 <select
-                    className="column-filter-select"
+                    className="gen-rep-column-filter"
                     value={columnFilters[columnKey] || ''}
                     onChange={(e) => handleFilterChange(columnKey, e.target.value)}
                 >
@@ -451,9 +460,11 @@ const GenerateReports = () => {
     };
 
     const renderStockTable = () => {
-        if (!reportData || reportData.length === 0) return <p className="no-data">No records.</p>;
+        if (!reportData || reportData.length === 0) return <p className="gen-rep-no-data">No records.</p>;
 
         const isCurrent = generatedReportType === 'current';
+        const isDayWise = generatedReportType === 'day_wise';
+        const isComponentWise = generatedReportType === 'component_wise';
         const isProjectReportStock = generatedReportType === 'out_project' || generatedReportType === 'in_project';
         const isCartReport = generatedReportType === 'in_cart';
         const isRequirements = generatedReportType === 'requirements';
@@ -462,17 +473,25 @@ const GenerateReports = () => {
         const filteredData = getFilteredData();
 
         return (
-            <div className="table-responsive">
-                <table className="report-table">
+            <div className="gen-rep-table-responsive">
+                <table className="gen-rep-table">
                     <thead>
                         <tr>
-                            {isCurrent ? (
+                            {isCurrent || isDayWise ? (
                                 <>
                                     <th>ID {renderFilterDropdown('componentID')}</th>
                                     <th>Name {renderFilterDropdown('name')}</th>
                                     <th>Qty</th>
-                                    <th>Location {renderFilterDropdown('location')}</th>
+                                    {isCurrent && <th>Location {renderFilterDropdown('location')}</th>}
                                     <th>Available {renderFilterDropdown('available')}</th>
+                                </>
+                            ) : isComponentWise ? (
+                                <>
+                                    <th>ID {renderFilterDropdown('componentID')}</th>
+                                    <th>Name {renderFilterDropdown('name')}</th>
+                                    <th>Total IN {renderFilterDropdown('totalIn')}</th>
+                                    <th>Total OUT {renderFilterDropdown('totalOut')}</th>
+                                    <th>Current Stock {renderFilterDropdown('currentStock')}</th>
                                 </>
                             ) : isRequirements ? (
                                 <>
@@ -529,21 +548,32 @@ const GenerateReports = () => {
                     </thead>
                     <tbody>
                         {filteredData.length === 0 ? (
-                            <tr><td colSpan="10" className="no-data">No matching records found.</td></tr>
+                            <tr><td colSpan="10" className="gen-rep-no-data">No matching records found.</td></tr>
                         ) : (
                             filteredData.map((row, index) => {
-                                if (isCurrent) {
-                                    // As before...
+                                if (isCurrent || isDayWise) {
                                     return (
                                         <tr key={index}>
                                             <td>{row.componentID}</td>
                                             <td>{row.name}</td>
-                                            <td className={row.quantity < 10 ? 'low-stock' : ''}>{row.quantity}</td>
-                                            <td>{row.location || '-'}</td>
+                                            <td className={row.quantity < 10 ? 'gen-rep-low-stock' : ''}>{row.quantity}</td>
+                                            {isCurrent && <td>{row.location || '-'}</td>}
                                             <td>
-                                                <span className={`badge ${row.available ? 'available' : 'unavailable'}`}>
+                                                <span className={`gen-rep-badge ${row.available ? 'available' : 'unavailable'}`}>
                                                     {row.available ? 'In Stock' : 'Out of Stock'}
                                                 </span>
+                                            </td>
+                                        </tr>
+                                    );
+                                } else if (isComponentWise) {
+                                    return (
+                                        <tr key={index}>
+                                            <td>{row.componentID}</td>
+                                            <td>{row.name}</td>
+                                            <td style={{ color: 'green' }}>{row.totalIn}</td>
+                                            <td style={{ color: 'red' }}>{row.totalOut}</td>
+                                            <td className={row.currentStock < 0 ? 'gen-rep-low-stock' : ''}>
+                                                <strong>{row.currentStock}</strong>
                                             </td>
                                         </tr>
                                     );
@@ -574,7 +604,7 @@ const GenerateReports = () => {
                                                     } else if (typeof value[0] === 'object') {
                                                         // Array of objects - display as a list
                                                         displayValue = (
-                                                            <ul className="nested-list">
+                                                            <ul className="gen-rep-nested-list">
                                                                 {value.map((item, idx) => (
                                                                     <li key={idx}>
                                                                         {Object.entries(item).map(([k, v]) => (
@@ -594,7 +624,7 @@ const GenerateReports = () => {
                                                 // Handle objects
                                                 else if (typeof value === 'object' && value !== null) {
                                                     displayValue = (
-                                                        <div className="nested-object">
+                                                        <div className="gen-rep-nested-object">
                                                             {Object.entries(value).map(([k, v]) => (
                                                                 <div key={k}>
                                                                     <strong>{k}:</strong> {String(v)}
@@ -618,13 +648,13 @@ const GenerateReports = () => {
                                             <td>{new Date(row.date).toLocaleDateString()}</td>
                                             <td>{row.componentID}</td>
                                             <td>{row.componentName || '-'}</td>
-                                            <td><span className={`badge ${row.type === 'IN' ? 'in-type' : 'out-type'}`}>{row.type}</span></td>
+                                            <td><span className={`gen-rep-badge ${row.type === 'IN' ? 'in-type' : 'out-type'}`}>{row.type}</span></td>
                                             <td>{row.quantity}</td>
                                             <td>
                                                 {pd.title ? (
                                                     <div>
                                                         <strong>{pd.title}</strong>
-                                                        <div className="small-text">ID: {pd.id}</div>
+                                                        <div className="gen-rep-small-text">ID: {pd.id}</div>
                                                     </div>
                                                 ) : '-'}
                                             </td>
@@ -657,7 +687,7 @@ const GenerateReports = () => {
                                             <td>{cd.vendorName || '-'}</td>
                                             <td>{cd.orderDate ? new Date(cd.orderDate).toLocaleDateString() : '-'}</td>
                                             <td>
-                                                <span className="status-badge">{cd.status || '-'}</span>
+                                                <span className="gen-rep-status-badge">{cd.status || '-'}</span>
                                             </td>
                                             <td>{row.remark}</td>
                                         </tr>
@@ -670,7 +700,7 @@ const GenerateReports = () => {
                                             <td>{row.componentID}</td>
                                             <td>{row.componentName || '-'}</td>
                                             <td>
-                                                <span className={`badge ${row.type === 'IN' ? 'in-type' : 'out-type'}`}>
+                                                <span className={`gen-rep-badge ${row.type === 'IN' ? 'in-type' : 'out-type'}`}>
                                                     {row.type}
                                                 </span>
                                             </td>
@@ -705,35 +735,35 @@ const GenerateReports = () => {
         <div className="manager-dashboard">
             <TopBarWithLogo title="Generate Reports" />
 
-            <div className="generate-reports-container">
-                <div className="reports-header">
+            <div className="gen-rep-container">
+                <div className="gen-rep-header">
                     <h1>Report Generation Center</h1>
                     <p>Select the type of report you wish to generate and customize the details.</p>
                 </div>
 
-                <div className="reports-card">
-                    <div className="tabs-header">
+                <div className="gen-rep-card">
+                    <div className="gen-rep-tabs-header">
                         <button
-                            className={`tab-btn ${activeTab === 'project' ? 'active' : ''}`}
+                            className={`gen-rep-tab-btn ${activeTab === 'project' ? 'active' : ''}`}
                             onClick={() => { setActiveTab('project'); setReportData(null); }}
                         >
                             Project Reports
                         </button>
                         <button
-                            className={`tab-btn ${activeTab === 'stock' ? 'active' : ''}`}
+                            className={`gen-rep-tab-btn ${activeTab === 'stock' ? 'active' : ''}`}
                             onClick={() => { setActiveTab('stock'); setReportData(null); }}
                         >
                             Stock Reports
                         </button>
                     </div>
 
-                    <div className="tab-content">
+                    <div className="gen-rep-tab-content">
                         {activeTab === 'project' ? (
-                            <div className="project-reports-section">
-                                <div className="form-group">
+                            <div className="gen-rep-project-section">
+                                <div className="gen-rep-form-group">
                                     <label>Select Report Mode</label>
                                     <select
-                                        className="report-select"
+                                        className="gen-rep-select"
                                         value={projectReportMode}
                                         onChange={(e) => setProjectReportMode(e.target.value)}
                                     >
@@ -746,33 +776,32 @@ const GenerateReports = () => {
                                 </div>
 
                                 {projectReportMode === 'certificate' ? (
-                                    <div className="certificate-section" style={{ marginTop: '20px', padding: '20px', border: '1px solid #ddd', borderRadius: '8px' }}>
+                                    <div className="gen-rep-certificate-section">
                                         <h3>Generate Project Certificate</h3>
                                         <p>Enter the Project ID to generate and download the official certificate.</p>
-                                        <div className="form-group" style={{ maxWidth: '400px', margin: '20px 0' }}>
+                                        <div className="gen-rep-form-group" style={{ maxWidth: '400px', margin: '20px 0' }}>
                                             <label>Project ID</label>
                                             <input
                                                 type="text"
-                                                className="form-control"
+                                                className="gen-rep-form-control"
                                                 placeholder="e.g. PRJ12345"
                                                 value={certificateProjectId}
                                                 onChange={(e) => setCertificateProjectId(e.target.value)}
-                                                style={{ width: '100%', padding: '10px', marginTop: '5px' }}
                                             />
                                         </div>
                                         <button
-                                            className="generate-btn"
+                                            className="gen-rep-generate-btn"
                                             onClick={handleDownloadCertificate}
                                             disabled={loading}
-                                            style={{ backgroundColor: '#e74c3c', color: 'white', border: 'none', padding: '10px 20px', cursor: 'pointer', borderRadius: '4px' }}
+                                            style={{ backgroundColor: '#e74c3c' }}
                                         >
                                             {loading ? 'Generating...' : 'Download Certificate'}
                                         </button>
                                     </div>
                                 ) : (
                                     <>
-                                        <div className="filters-row">
-                                            <div className="form-group third">
+                                        <div className="gen-rep-filters-row">
+                                            <div className="gen-rep-form-group third">
                                                 <label>Project Status</label>
                                                 <select value={projectFilters.status} onChange={e => setProjectFilters({ ...projectFilters, status: e.target.value })}>
                                                     <option value="All">All</option>
@@ -780,7 +809,7 @@ const GenerateReports = () => {
                                                     <option value="Completed">Completed</option>
                                                 </select>
                                             </div>
-                                            <div className="form-group third">
+                                            <div className="gen-rep-form-group third">
                                                 <label>Project Type</label>
                                                 <select value={projectFilters.type} onChange={e => setProjectFilters({ ...projectFilters, type: e.target.value })}>
                                                     <option value="All">All</option>
@@ -788,7 +817,7 @@ const GenerateReports = () => {
                                                     <option value="Mega">Mega</option>
                                                 </select>
                                             </div>
-                                            <div className="form-group third">
+                                            <div className="gen-rep-form-group third">
                                                 <label>Batch</label>
                                                 <select value={projectFilters.batch} onChange={e => setProjectFilters({ ...projectFilters, batch: e.target.value })}>
                                                     <option value="All">All</option>
@@ -802,13 +831,13 @@ const GenerateReports = () => {
                                         </div>
 
                                         {projectReportMode === 'custom' && (
-                                            <div className="custom-options-panel">
+                                            <div className="gen-rep-custom-panel">
                                                 <h4>Custom Report Details</h4>
 
-                                                <div className="custom-section">
-                                                    <label className="section-label">Project Details</label>
-                                                    <div className="options-grid">
-                                                        <label className="checkbox-label">
+                                                <div className="gen-rep-custom-section">
+                                                    <label className="gen-rep-section-label">Project Details</label>
+                                                    <div className="gen-rep-options-grid">
+                                                        <label className="gen-rep-checkbox-label">
                                                             <input
                                                                 type="checkbox"
                                                                 checked={projectCustomOptions.includeId}
@@ -816,7 +845,7 @@ const GenerateReports = () => {
                                                             />
                                                             <span>Include ID</span>
                                                         </label>
-                                                        <label className="checkbox-label">
+                                                        <label className="gen-rep-checkbox-label">
                                                             <input
                                                                 type="checkbox"
                                                                 checked={projectCustomOptions.includeTitle}
@@ -824,7 +853,7 @@ const GenerateReports = () => {
                                                             />
                                                             <span>Include Title</span>
                                                         </label>
-                                                        <label className="checkbox-label">
+                                                        <label className="gen-rep-checkbox-label">
                                                             <input
                                                                 type="checkbox"
                                                                 checked={projectCustomOptions.includeDescription}
@@ -832,7 +861,7 @@ const GenerateReports = () => {
                                                             />
                                                             <span>Include Description</span>
                                                         </label>
-                                                        <label className="checkbox-label">
+                                                        <label className="gen-rep-checkbox-label">
                                                             <input
                                                                 type="checkbox"
                                                                 checked={projectCustomOptions.includeYear}
@@ -843,10 +872,10 @@ const GenerateReports = () => {
                                                     </div>
                                                 </div>
 
-                                                <div className="custom-section">
-                                                    <label className="section-label">Team Details</label>
-                                                    <div className="radio-group">
-                                                        <label className="radio-label">
+                                                <div className="gen-rep-custom-section">
+                                                    <label className="gen-rep-section-label">Team Details</label>
+                                                    <div className="gen-rep-radio-group">
+                                                        <label className="gen-rep-radio-label">
                                                             <input
                                                                 type="radio"
                                                                 name="teamDetails"
@@ -856,7 +885,7 @@ const GenerateReports = () => {
                                                             />
                                                             <span>None</span>
                                                         </label>
-                                                        <label className="radio-label">
+                                                        <label className="gen-rep-radio-label">
                                                             <input
                                                                 type="radio"
                                                                 name="teamDetails"
@@ -866,7 +895,7 @@ const GenerateReports = () => {
                                                             />
                                                             <span>ID Only</span>
                                                         </label>
-                                                        <label className="radio-label">
+                                                        <label className="gen-rep-radio-label">
                                                             <input
                                                                 type="radio"
                                                                 name="teamDetails"
@@ -876,7 +905,7 @@ const GenerateReports = () => {
                                                             />
                                                             <span>ID + PRN</span>
                                                         </label>
-                                                        <label className="radio-label">
+                                                        <label className="gen-rep-radio-label">
                                                             <input
                                                                 type="radio"
                                                                 name="teamDetails"
@@ -886,7 +915,7 @@ const GenerateReports = () => {
                                                             />
                                                             <span>ID + PRN + Name</span>
                                                         </label>
-                                                        <label className="radio-label">
+                                                        <label className="gen-rep-radio-label">
                                                             <input
                                                                 type="radio"
                                                                 name="teamDetails"
@@ -896,7 +925,7 @@ const GenerateReports = () => {
                                                             />
                                                             <span>ID + Name + Contact (Mobile)</span>
                                                         </label>
-                                                        <label className="radio-label">
+                                                        <label className="gen-rep-radio-label">
                                                             <input
                                                                 type="radio"
                                                                 name="teamDetails"
@@ -909,10 +938,10 @@ const GenerateReports = () => {
                                                     </div>
                                                 </div>
 
-                                                <div className="custom-section">
-                                                    <label className="section-label">Other Details</label>
-                                                    <div className="options-grid">
-                                                        <label className="checkbox-label">
+                                                <div className="gen-rep-custom-section">
+                                                    <label className="gen-rep-section-label">Other Details</label>
+                                                    <div className="gen-rep-options-grid">
+                                                        <label className="gen-rep-checkbox-label">
                                                             <input
                                                                 type="checkbox"
                                                                 checked={projectCustomOptions.includeGuideDetails}
@@ -920,7 +949,7 @@ const GenerateReports = () => {
                                                             />
                                                             <span>Include Guide Details</span>
                                                         </label>
-                                                        <label className="checkbox-label">
+                                                        <label className="gen-rep-checkbox-label">
                                                             <input
                                                                 type="checkbox"
                                                                 checked={projectCustomOptions.includeComponents}
@@ -933,15 +962,15 @@ const GenerateReports = () => {
                                             </div>
                                         )}
 
-                                        <button className="generate-btn" onClick={handleGenerate} disabled={loading}>
+                                        <button className="gen-rep-generate-btn" onClick={handleGenerate} disabled={loading}>
                                             {loading ? 'Generating Report...' : 'Generate Report'}
                                         </button>
 
                                         {reportData && (
-                                            <div className="results-section fade-in">
-                                                <div className="results-header">
+                                            <div className="gen-rep-results fade-in">
+                                                <div className="gen-rep-results-header">
                                                     <h3>Report Results ({reportData.length} records)</h3>
-                                                    <button className="download-btn-small" onClick={downloadPDF}>
+                                                    <button className="gen-rep-download-btn" onClick={downloadPDF}>
                                                         <FaDownload /> Download PDF
                                                     </button>
                                                 </div>
@@ -953,12 +982,12 @@ const GenerateReports = () => {
 
                             </div>
                         ) : (
-                            <div className="stock-reports-section">
-                                <div className="filters-row">
-                                    <div className="form-group hover-effect">
+                            <div className="gen-rep-stock-section">
+                                <div className="gen-rep-filters-row">
+                                    <div className="gen-rep-form-group hover-effect">
                                         <label><FaFilter /> Report Type</label>
                                         <select
-                                            className="report-select"
+                                            className="gen-rep-select"
                                             value={stockReportType}
                                             onChange={(e) => setStockReportType(e.target.value)}
                                         >
@@ -968,35 +997,47 @@ const GenerateReports = () => {
                                             <option value="in_stock">Stock In History</option>
                                             <option value="out_project">Stock Out (Projects)</option>
                                             <option value="out_distribution">Stock Out (Distribution)</option>
+                                            <option value="day_wise">Day Wise Stock Report</option>
+                                            <option value="component_wise">Component Wise Stock</option>
                                         </select>
                                     </div>
-                                    <div className="form-group hover-effect">
-                                        <label><FaCalendarAlt /> Date Range</label>
-                                        <div className="date-inputs">
-                                            <input
-                                                type="date"
-                                                value={dateRange.startDate}
-                                                onChange={(e) => setDateRange({ ...dateRange, startDate: e.target.value })}
-                                            />
-                                            <span>to</span>
-                                            <input
-                                                type="date"
-                                                value={dateRange.endDate}
-                                                onChange={(e) => setDateRange({ ...dateRange, endDate: e.target.value })}
-                                            />
+                                    <div className="gen-rep-form-group hover-effect">
+                                        <label><FaCalendarAlt /> {stockReportType === 'day_wise' ? 'Select Date' : 'Date Range (Optional)'}</label>
+                                        <div className="gen-rep-date-inputs">
+                                            {stockReportType === 'day_wise' ? (
+                                                <input
+                                                    type="date"
+                                                    value={dateRange.endDate}
+                                                    onChange={(e) => setDateRange({ ...dateRange, endDate: e.target.value })}
+                                                />
+                                            ) : (
+                                                <>
+                                                    <input
+                                                        type="date"
+                                                        value={dateRange.startDate}
+                                                        onChange={(e) => setDateRange({ ...dateRange, startDate: e.target.value })}
+                                                    />
+                                                    <span>to</span>
+                                                    <input
+                                                        type="date"
+                                                        value={dateRange.endDate}
+                                                        onChange={(e) => setDateRange({ ...dateRange, endDate: e.target.value })}
+                                                    />
+                                                </>
+                                            )}
                                         </div>
                                     </div>
                                 </div>
 
-                                <button className="generate-btn" onClick={handleGenerate} disabled={loading}>
+                                <button className="gen-rep-generate-btn" onClick={handleGenerate} disabled={loading}>
                                     {loading ? 'Generating Report...' : 'Generate Report'}
                                 </button>
 
                                 {reportData && (
-                                    <div className="results-section fade-in">
-                                        <div className="results-header">
+                                    <div className="gen-rep-results fade-in">
+                                        <div className="gen-rep-results-header">
                                             <h3>Report Results</h3>
-                                            <button className="download-btn-small" onClick={downloadPDF}>
+                                            <button className="gen-rep-download-btn" onClick={downloadPDF}>
                                                 <FaDownload /> Download PDF
                                             </button>
                                         </div>

@@ -1,9 +1,16 @@
 import React, { useEffect, useState } from 'react';
 import './Dashboard.css';
 import NoDataFound from '../../components/NoDataFound';
-import { FaUsers, FaChalkboardTeacher, FaBoxOpen, FaProjectDiagram } from 'react-icons/fa';
+import { FaUsers, FaChalkboardTeacher, FaBoxOpen, FaProjectDiagram, FaCalendarAlt } from 'react-icons/fa';
 
 const BASE_URL = process.env.REACT_APP_API_BASE_URL;
+
+const YEAR_MAP = {
+  1: "First Year",
+  2: "Second Year",
+  3: "Third Year",
+  4: "Final Year"
+};
 
 function Dashboard({ projects = [], loading = false }) {
   const [selectedComponents, setSelectedComponents] = useState(null);
@@ -39,6 +46,14 @@ function Dashboard({ projects = [], loading = false }) {
                   <div className="detail-content">
                     <label>Team Members</label>
                     <p>{renderTeamMembers(project?.team?.members)}</p>
+                  </div>
+                </div>
+
+                <div className="detail-row">
+                  <FaCalendarAlt className="detail-icon" />
+                  <div className="detail-content">
+                    <label>Year</label>
+                    <p>{YEAR_MAP[project.year] || 'N/A'}</p>
                   </div>
                 </div>
 

@@ -430,3 +430,122 @@ exports.createInstructor = async (req, res) => {
         return res.status(500).json({ success: false, message: "Internal server error!" });
     }
 };
+
+exports.createAdmin = async (req, res) => {
+    try {
+        const { firstName, lastName, email, password, cPassword, contactNumber, userID } = req.body;
+
+        if (!firstName || !lastName || !email || !password || !cPassword || !contactNumber || !userID) {
+            return res.status(400).json({ success: false, message: "All fields are required!" });
+        }
+
+        if (password !== cPassword) {
+            return res.status(400).json({ success: false, message: "Passwords do not match!" });
+        }
+
+        const exist = await User.findOne({ userID: Number(userID) });
+        if (exist) {
+            return res.status(409).json({ success: false, message: "User ID already taken!" });
+        }
+
+        const emailExist = await User.findOne({ email });
+        if (emailExist) {
+            return res.status(409).json({ success: false, message: "Email already exists!" });
+        }
+
+        const hashedPassword = await bcrypt.hash(password, 10);
+
+        const profile = await Profile.create({
+            gender: null,
+            about: null,
+            dateOfBirth: null,
+            contactNo: null,
+        });
+
+        const userData = {
+            firstName,
+            lastName,
+            email,
+            userID: Number(userID),
+            password: hashedPassword,
+            accountType: "Admin",
+            isVerified: true,
+            contactNumber,
+            additionalDetail: profile._id,
+            image: `https://api.dicebear.com/5.x/initials/svg?seed=${firstName} ${lastName}`,
+        };
+
+        const user = await User.create(userData);
+
+        return res.status(200).json({
+            success: true,
+            message: "Admin created successfully!",
+            user,
+        });
+
+    } catch (err) {
+        console.error("Error creating admin:", err);
+        return res.status(500).json({ success: false, message: "Internal server error!" });
+    }
+};
+
+exports.createStudentDirect = async (req, res) => {
+    try {
+        const { firstName, lastName, email, password, cPassword, contactNumber, userID, batch, passingYear, academicYear } = req.body;
+
+        if (!firstName || !lastName || !email || !password || !cPassword || !contactNumber || !userID || !batch || !passingYear || !academicYear) {
+            return res.status(400).json({ success: false, message: "All fields are required for student!" });
+        }
+
+        if (password !== cPassword) {
+            return res.status(400).json({ success: false, message: "Passwords do not match!" });
+        }
+
+        const exist = await User.findOne({ userID: Number(userID) });
+        if (exist) {
+            return res.status(409).json({ success: false, message: "User ID already taken!" });
+        }
+
+        const emailExist = await User.findOne({ email });
+        if (emailExist) {
+            return res.status(409).json({ success: false, message: "Email already exists!" });
+        }
+
+        const hashedPassword = await bcrypt.hash(password, 10);
+
+        const profile = await Profile.create({
+            gender: null,
+            about: null,
+            dateOfBirth: null,
+            contactNo: null,
+        });
+
+        const userData = {
+            firstName,
+            lastName,
+            email,
+            userID: Number(userID),
+            password: hashedPassword,
+            accountType: "Student",
+            isVerified: true,
+            contactNumber,
+            additionalDetail: profile._id,
+            image: `https://api.dicebear.com/5.x/initials/svg?seed=${firstName} ${lastName}`,
+            batch: parseInt(batch.replace("EN-", "")),
+            passingYear: Number(passingYear),
+            year: parseInt(academicYear)
+        };
+
+        const user = await User.create(userData);
+
+        return res.status(200).json({
+            success: true,
+            message: "Student created successfully!",
+            user,
+        });
+
+    } catch (err) {
+        console.error("Error creating student:", err);
+        return res.status(500).json({ success: false, message: "Internal server error!" });
+    }
+};

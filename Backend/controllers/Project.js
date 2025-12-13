@@ -129,8 +129,9 @@ exports.getAllProjects = async (req, res) => {
   try {
     const projects = await Project.find({})
       .populate('teamID')
-      .populate('guideID');
-    console.log(projects);
+      .populate('guideID')
+      .lean(); // Use lean() to get plain JS objects
+
     if (!projects || projects.length === 0) {
       return res.status(404).json({
         success: false,
@@ -138,10 +139,53 @@ exports.getAllProjects = async (req, res) => {
       });
     }
 
+    // Collect all unique student userIDs from all projects
+    const studentUserIDs = new Set();
+    projects.forEach(p => {
+      if (p.teamID && p.teamID.members) {
+        p.teamID.members.forEach(m => {
+          if (m.userID) studentUserIDs.add(Number(m.userID));
+        });
+      }
+    });
+
+    // Fetch User details (year, batch)
+    const users = await User.find({ userID: { $in: Array.from(studentUserIDs) } })
+      .select('userID year batch');
+
+    // Create a map for quick lookup
+    const userMap = {};
+    users.forEach(u => {
+      userMap[u.userID] = u;
+    });
+
+    // Attach year and batch to projects
+    const enrichedProjects = projects.map(p => {
+      let projectYear = null;
+      let projectBatch = p.batch; // Default to project's stored batch
+
+      if (p.teamID && p.teamID.members && p.teamID.members.length > 0) {
+        // Find the lead or first member to determine Year
+        const leadMember = p.teamID.members.find(m => m.role === 'Lead') || p.teamID.members[0];
+        const user = userMap[Number(leadMember.userID)];
+        if (user) {
+          projectYear = user.year;
+          // If project batch is missing, try to use user batch (fallback)
+          if (!projectBatch) projectBatch = user.batch;
+        }
+      }
+
+      return {
+        ...p,
+        year: projectYear,
+        batch: projectBatch
+      };
+    });
+
     return res.status(200).json({
       success: true,
       message: "Fetched all projects successfully!",
-      data: projects
+      data: enrichedProjects
     });
   } catch (error) {
     console.error("Error fetching projects:", error);
@@ -205,7 +249,7 @@ exports.getUserProjects = async (req, res) => {
 
     // Fetch User documents for these IDs
     const studentUsers = await User.find({ userID: { $in: Array.from(allStudentUserIDs) } })
-      .select('firstName lastName userID email image contactNumber'); // Select necessary fields
+      .select('firstName lastName userID email image contactNumber year batch'); // Select necessary fields
 
     console.log("Fetched Student Users:", studentUsers.length);
 
@@ -237,6 +281,8 @@ exports.getUserProjects = async (req, res) => {
             email: userDetails ? userDetails.email : '',
             image: userDetails ? userDetails.image : '',
             contactNumber: userDetails ? userDetails.contactNumber : '',
+            year: userDetails ? userDetails.year : null,
+            batch: userDetails ? userDetails.batch : null
           };
         });
 
@@ -245,6 +291,15 @@ exports.getUserProjects = async (req, res) => {
           ...enrichedTeam.toObject(),
           members: enrichedMembers
         };
+      }
+
+      // Determine project year from Lead or first member
+      let projectYear = null;
+      let projectBatch = p.batch;
+      if (enrichedTeam && enrichedTeam.members && enrichedTeam.members.length > 0) {
+        const lead = enrichedTeam.members.find(m => m.role === 'Lead') || enrichedTeam.members[0];
+        projectYear = lead.year;
+        if (!projectBatch) projectBatch = lead.batch;
       }
 
       return {
@@ -258,7 +313,9 @@ exports.getUserProjects = async (req, res) => {
         // members:p.teamI
         projectGuide: p.guideID,
         createdAt: p.createdAt,
-        reports: p.reports || []
+        reports: p.reports || [],
+        year: projectYear,
+        batch: projectBatch
       }
     });
     console.log(formattedProjects);
@@ -497,10 +554,52 @@ exports.projectReturn = async (req, res) => {
 exports.getGuidedProjects = async (req, res) => {
   try {
     const userId = req.user.userId;
-    const projects = await Project.find({ guideID: userId });
+    const projects = await Project.find({ guideID: userId })
+      .populate('teamID')
+      .lean();
+
+    // Collect all unique student userIDs
+    const studentUserIDs = new Set();
+    projects.forEach(p => {
+      if (p.teamID && p.teamID.members) {
+        p.teamID.members.forEach(m => {
+          if (m.userID) studentUserIDs.add(Number(m.userID));
+        });
+      }
+    });
+
+    // Fetch User details
+    const users = await User.find({ userID: { $in: Array.from(studentUserIDs) } })
+      .select('userID year batch');
+
+    const userMap = {};
+    users.forEach(u => {
+      userMap[u.userID] = u;
+    });
+
+    const enrichedProjects = projects.map(p => {
+      let projectYear = null;
+      let projectBatch = p.batch;
+
+      if (p.teamID && p.teamID.members && p.teamID.members.length > 0) {
+        const leadMember = p.teamID.members.find(m => m.role === 'Lead') || p.teamID.members[0];
+        const user = userMap[Number(leadMember.userID)];
+        if (user) {
+          projectYear = user.year;
+          if (!projectBatch) projectBatch = user.batch;
+        }
+      }
+
+      return {
+        ...p,
+        year: projectYear,
+        batch: projectBatch
+      };
+    });
+
     return res.status(200).json({
       success: true,
-      projects
+      projects: enrichedProjects
     });
   } catch (error) {
     console.log(error);

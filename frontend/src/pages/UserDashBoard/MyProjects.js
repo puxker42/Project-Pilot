@@ -9,6 +9,13 @@ import { Dialog, DialogTitle, DialogContent, DialogActions, Button } from '@mui/
 const BASE_URL = process.env.REACT_APP_API_BASE_URL;
 const ITEMS_PER_PAGE = 3;
 
+const YEAR_MAP = {
+  1: "First Year",
+  2: "Second Year",
+  3: "Third Year",
+  4: "Final Year"
+};
+
 function MyProjects() {
   const [projects, setProjects] = useState([]);
   const [filteredProjects, setFilteredProjects] = useState([]);
@@ -118,7 +125,7 @@ function MyProjects() {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          authorization: `Bearer ${token}`,
+          'authorization': `Bearer ${token}`,
         },
         body: JSON.stringify({ reportNumber, fileUrl })
       });
@@ -138,7 +145,7 @@ function MyProjects() {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          authorization: `Bearer ${token}`,
+          'authorization': `Bearer ${token}`,
         },
         body: JSON.stringify({ reportNumber })
       });
@@ -175,6 +182,7 @@ function MyProjects() {
                 <tr>
                   <th>Project ID / Name</th>
                   <th>Team Members</th>
+                  <th>Year</th>
                   <th>View Components</th>
                   <th>Guide Info</th>
                   <th>Status</th>
@@ -190,6 +198,7 @@ function MyProjects() {
                       {project.title}
                     </td>
                     <td>{renderTeamMembers(project?.team?.members || [])}</td>
+                    <td>{YEAR_MAP[project.year] || 'N/A'}</td>
                     <td>
                       <a
                         className="view-link"

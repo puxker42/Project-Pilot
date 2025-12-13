@@ -4,6 +4,22 @@ import TopBarWithLogo from '../TopBarWithLogo';
 import NoProjects from '../../../images/NoProjects.jpg';
 const BASE_URL = process.env.REACT_APP_API_BASE_URL;
 
+const YEAR_MAP = {
+  1: "First Year",
+  2: "Second Year",
+  3: "Third Year",
+  4: "Final Year"
+};
+
+const BATCH_MAP = {
+  1: "EN-1",
+  2: "EN-2",
+  3: "EN-3",
+  4: "EN-4",
+  5: "EN-5",
+  6: "EN-6"
+};
+
 const ProjectDashboard = () => {
   const [projects, setProjects] = useState([]);
   const [selectedProject, setSelectedProject] = useState(null);
@@ -14,6 +30,8 @@ const ProjectDashboard = () => {
   const [error, setError] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
   const [filterStatus, setFilterStatus] = useState('all'); // 'all', 'approved', 'not_approved'
+  const [filterYear, setFilterYear] = useState('all');
+  const [filterBatch, setFilterBatch] = useState('all');
 
   useEffect(() => {
     const fetchProjects = async () => {
@@ -166,6 +184,9 @@ const ProjectDashboard = () => {
     if (filterStatus === 'approved' && !isApproved) return false;
     if (filterStatus === 'not_approved' && isApproved) return false;
 
+    if (filterYear !== 'all' && proj.year !== parseInt(filterYear)) return false;
+    if (filterBatch !== 'all' && proj.batch !== parseInt(filterBatch)) return false;
+
     return matchesSearch;
   });
 
@@ -187,9 +208,35 @@ const ProjectDashboard = () => {
             onChange={(e) => setFilterStatus(e.target.value)}
             className="filter-select1"
           >
-            <option value="all">All</option>
+            <option value="all">All Status</option>
             <option value="approved">Approved</option>
             <option value="not_approved">Not Approved</option>
+          </select>
+
+          <select
+            value={filterYear}
+            onChange={(e) => setFilterYear(e.target.value)}
+            className="filter-select1"
+          >
+            <option value="all">All Years</option>
+            <option value="1">First Year</option>
+            <option value="2">Second Year</option>
+            <option value="3">Third Year</option>
+            <option value="4">Final Year</option>
+          </select>
+
+          <select
+            value={filterBatch}
+            onChange={(e) => setFilterBatch(e.target.value)}
+            className="filter-select1"
+          >
+            <option value="all">All Batches</option>
+            <option value="1">EN-1</option>
+            <option value="2">EN-2</option>
+            <option value="3">EN-3</option>
+            <option value="4">EN-4</option>
+            <option value="5">EN-5</option>
+            <option value="6">EN-6</option>
           </select>
         </div>
 
@@ -213,6 +260,7 @@ const ProjectDashboard = () => {
                 <th>Project ID</th>
                 <th>Project Name</th>
                 <th>Team ID</th>
+                <th>Year</th>
                 <th>Approved</th>
                 <th>Guide Name</th>
                 <th>Action</th>
@@ -224,6 +272,7 @@ const ProjectDashboard = () => {
                   <td>{proj.ID}</td>
                   <td>{proj.title}</td>
                   <td>{proj.teamID?.teamID || 'N/A'}</td>
+                  <td>{YEAR_MAP[proj.year] || 'N/A'}</td>
                   <td style={{ fontWeight: 'bold', color: proj.approved ? 'green' : 'red' }}>
                     {proj.approved ? 'Yes' : 'No'}
                   </td>
@@ -247,6 +296,7 @@ const ProjectDashboard = () => {
           <div className="modal-overlay1" onClick={closeModal}>
             <div className="modal-content1" onClick={(e) => e.stopPropagation()}>
               <h3>Component List - {selectedProject.title}</h3>
+              <p><strong>Batch:</strong> {BATCH_MAP[selectedProject.batch] || 'N/A'}</p>
               <table className="component-table1">
                 <thead>
                   <tr>

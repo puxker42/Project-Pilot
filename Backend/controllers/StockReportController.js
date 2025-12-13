@@ -41,6 +41,140 @@ exports.generateStockReport = async (req, res) => {
                     return res.status(500).json({ success: false, message: "Error fetching current stock" });
                 }
 
+            case 'day_wise':
+                try {
+                    console.log("Generating Day Wise Stock Report for:", startDate || endDate);
+
+                    // 1. Determine Date Boundary
+                    let targetDate = endDate ? new Date(endDate) : (startDate ? new Date(startDate) : new Date());
+                    targetDate.setHours(23, 59, 59, 999); // End of the day
+
+                    // 2. Fetch all Component Basics (for names and IDs)
+                    const components = await Component.find({}, 'cID title').lean();
+
+                    // Initialize stock map with 0
+                    const stockMap = {};
+                    const componentNameMap = {};
+
+                    components.forEach(c => {
+                        stockMap[c.cID] = 0;
+                        componentNameMap[c.cID] = c.title;
+                    });
+
+                    // 3. Fetch ALL Logs up to target Date
+                    const dayWiseQuery = { date: { $lte: targetDate } };
+                    const historicLogs = await StockLog.find(dayWiseQuery).sort({ date: 1 }).lean();
+                    console.log(`Replaying ${historicLogs.length} logs for day wise report...`);
+
+                    // 4. Replay Logs
+                    historicLogs.forEach(log => {
+                        if (!stockMap.hasOwnProperty(log.componentID)) {
+                            // Can happen if component was deleted or new ID used in logs not in current DB
+                            stockMap[log.componentID] = 0;
+                            componentNameMap[log.componentID] = componentNameMap[log.componentID] || `Deleted/Unknown (${log.componentID})`;
+                        }
+
+                        // Data Integrity Check
+                        if (log.type && typeof log.quantity === 'number') {
+                            if (log.type === 'IN') {
+                                stockMap[log.componentID] += log.quantity;
+                            } else if (log.type === 'OUT') {
+                                stockMap[log.componentID] -= log.quantity;
+                            }
+                        }
+                    });
+
+                    // 5. Build Result Data
+                    const reportData = Object.keys(stockMap).map(cID => {
+                        let calculatedQty = stockMap[cID];
+
+                        // Edge Case: Negative Stock -> Floor to 0
+                        if (calculatedQty < 0) calculatedQty = 0;
+
+                        return {
+                            componentID: cID,
+                            name: componentNameMap[cID],
+                            quantity: calculatedQty,
+                            date: targetDate,
+                            available: calculatedQty > 0
+                        };
+                    });
+
+                    return res.status(200).json({ success: true, count: reportData.length, data: reportData });
+
+                } catch (error) {
+                    console.error("Error generating day wise stock report:", error);
+                    return res.status(500).json({ success: false, message: "Error generating day wise report" });
+                }
+
+            case 'component_wise':
+                try {
+                    console.log("Generating Component Wise Stock Report");
+
+                    // 1. Fetch all Component Basics
+                    const components = await Component.find({}, 'cID title').lean();
+
+                    // Initialize maps
+                    const aggregationMap = {};
+                    const componentNameMap = {};
+
+                    components.forEach(c => {
+                        aggregationMap[c.cID] = { totalIn: 0, totalOut: 0 };
+                        componentNameMap[c.cID] = c.title;
+                    });
+
+                    // 2. Fetch Logs (Apply date filters if present, otherwise all time)
+                    // If user selects "Current Stock" logic, usually it is ALL TIME. 
+                    // But if they provide a date range, we ideally respect it for the "Total IN/OUT" 
+                    // during that period, but "Current Stock" usually implies "As of Now" or "As of End Date".
+                    // Given the user prompt "current = total in - out", and typical report behavior:
+                    // We will calculate totals based on the query (which might have date filters).
+                    // If no date filters, it's all time.
+
+                    const reportLogs = await StockLog.find(query).lean();
+                    console.log(`Aggregating ${reportLogs.length} logs for component wise report...`);
+
+                    // 3. Aggregate
+                    reportLogs.forEach(log => {
+                        if (!aggregationMap[log.componentID]) {
+                            aggregationMap[log.componentID] = { totalIn: 0, totalOut: 0 };
+                            componentNameMap[log.componentID] = componentNameMap[log.componentID] || `Deleted/Unknown (${log.componentID})`;
+                        }
+
+                        if (log.type && typeof log.quantity === 'number') {
+                            if (log.type === 'IN') {
+                                aggregationMap[log.componentID].totalIn += log.quantity;
+                            } else if (log.type === 'OUT') {
+                                aggregationMap[log.componentID].totalOut += log.quantity;
+                            }
+                        }
+                    });
+
+                    // 4. Build Result
+                    const reportData = Object.keys(aggregationMap).map(cID => {
+                        const { totalIn, totalOut } = aggregationMap[cID];
+                        let currentStock = totalIn - totalOut;
+
+                        // Edge Case: Negative Stock -> Floor to 0
+                        if (currentStock < 0) currentStock = 0;
+
+                        return {
+                            componentID: cID,
+                            name: componentNameMap[cID],
+                            totalIn,
+                            totalOut,
+                            currentStock,
+                            available: currentStock > 0
+                        };
+                    });
+
+                    return res.status(200).json({ success: true, count: reportData.length, data: reportData });
+
+                } catch (error) {
+                    console.error("Error generating component wise report:", error);
+                    return res.status(500).json({ success: false, message: "Error generating component wise report" });
+                }
+
             case 'in_out':
                 break;
 

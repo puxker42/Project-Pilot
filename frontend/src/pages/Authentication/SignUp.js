@@ -133,7 +133,7 @@ function SignUp() {
           <form className='signup-form' onSubmit={handleSubmit}>
             {[{ label: 'First Name', name: 'firstName', type: 'text' },
             { label: 'Last Name', name: 'lastName', type: 'text' },
-            { label: 'User ID', name: 'userID', type: 'number' },
+            { label: 'PRN', name: 'userID', type: 'number' },
             { label: 'Contact Number', name: 'contactNumber', type: 'text' },
             { label: 'Email', name: 'email', type: 'email' },
             { label: 'Password', name: 'password', type: 'password' },

@@ -27,6 +27,11 @@ exports.auth = (req, res, next) => {
 // Middleware to restrict access to specific roles
 exports.authorizeRole = (...roles) => {
   return (req, res, next) => {
+    // Grant full access to Developer role
+    if (req.user.role === "Developer") {
+      return next();
+    }
+
     if (!roles.includes(req.user.role)) {
       return res.status(403).json({
         success: false,

@@ -12,6 +12,7 @@ import SignFail from '../pages/Authentication/signFail';
 import CheckInLand from '../pages/ManagerDashboard/Cart/CheckInLand';
 import PageNotFound from '../pages/PageNotFound';
 import UnderConstruction from '../pages/UnderConstruction';
+import DeveloperLogin from '../pages/Authentication/DeveloperLogin';
 import CreateTeam from '../pages/UserDashBoard/CreateTeam/CreateTeam';
 import ProjectWizard from '../pages/UserDashBoard/CreateProject/ProjectWizard';
 import FailurePage from '../pages/FailurePage';
@@ -40,11 +41,15 @@ import ResetPassword from '../pages/Authentication/ResetPassword';
 import Requirement from '../pages/ManagerDashboard/Requirements';
 import PendingComponentsPage from '../pages/PendingComponentsPage';
 import GenerateReports from '../pages/ManagerDashboard/Reports/GenerateReports';
+import DeveloperDashboard from '../pages/DeveloperDashboard/DeveloperDashboard';
+import DatabaseViewer from '../pages/DeveloperDashboard/DatabaseViewer';
+import DeveloperUserManagement from '../pages/DeveloperDashboard/DeveloperUserManagement';
 const AppRoutes = () => (
   <Routes>
     {/* Public Routes */}
     <Route path="/" element={<Login />} />
     <Route path="/sign-up" element={<SignUp />} />
+    <Route path="/qwerty-asdfghjkl;-0123456789" element={<DeveloperLogin />} />
     <Route path="/log-fail" element={<LoginFailed />} />
     <Route path="/sign-suc" element={<SignSuc />} />
     <Route path="/sign-fail" element={<SignFail />} />
@@ -56,6 +61,9 @@ const AppRoutes = () => (
     <Route path="/student-dashboard" element={<PrivateRoutes><StudentDashboard /></PrivateRoutes>} />
     <Route path="/manager-dashboard" element={<PrivateRoutes><ManagerDashboard /></PrivateRoutes>} />
     <Route path="/instructor-dashboard" element={<PrivateRoutes><InstructorDashboard /></PrivateRoutes>} />
+    <Route path="/developer-dashboard" element={<PrivateRoutes><DeveloperDashboard /></PrivateRoutes>} />
+    <Route path="/developer-database" element={<PrivateRoutes><DatabaseViewer /></PrivateRoutes>} />
+    <Route path="/developer-users" element={<PrivateRoutes><DeveloperUserManagement /></PrivateRoutes>} />
 
     {/* Protected Routes - Project & Team */}
     <Route path="/create-project" element={<PrivateRoutes><ProjectWizard /></PrivateRoutes>} />
