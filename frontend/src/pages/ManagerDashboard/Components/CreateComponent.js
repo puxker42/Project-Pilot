@@ -3,7 +3,7 @@ import axios from 'axios';
 import './CreateComponent.css';
 import { useNavigate, useLocation } from 'react-router-dom';
 
-import TopBarWithLogo from '../TopBarWithLogo';
+
 const BASE_URL = process.env.REACT_APP_API_BASE_URL;
 
 const compressImage = (file, quality = 0.7) => {
@@ -199,7 +199,7 @@ const CreateComponent = ({ onComponentCreated }) => {
   return (
     <div className="create-component-container">
       {/* <h2>Create New Component</h2> */}
-      <TopBarWithLogo title='Component Creation Utility' />
+
       <div className='mastt'>
         {generatedCID && <p className="cid-label">Generated Component ID: <strong>{generatedCID}</strong></p>}
 

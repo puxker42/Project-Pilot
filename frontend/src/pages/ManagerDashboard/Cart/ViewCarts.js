@@ -1,12 +1,27 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import './ViewCarts.css';
-import TopBarWithLogo from '../TopBarWithLogo';
+
 import { useNavigate } from 'react-router-dom';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import logo from '../../../images/logo.png';
-import NoDataFound from '../../../components/NoDataFound'; // ✅ Import NoDataFound
+import NoDataFound from '../../../components/NoDataFound';
+import {
+  Box,
+  TextField,
+  Button,
+  Grid,
+  Typography,
+  Paper,
+  InputAdornment
+} from '@mui/material';
+import {
+  FilterList,
+  Clear,
+  Store,
+  Inventory
+} from '@mui/icons-material';
 
 const BASE_URL = process.env.REACT_APP_API_BASE_URL;
 
@@ -14,6 +29,12 @@ const ViewCarts = () => {
   const [carts, setCarts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+
+  // Filter States
+  const [componentSearch, setComponentSearch] = useState('');
+  const [vendorSearch, setVendorSearch] = useState('');
+  const [dateFilter, setDateFilter] = useState('');
+
   const [selectedCart, setSelectedCart] = useState(null);
   const [selectedForRemoval, setSelectedForRemoval] = useState([]);
   const navigate = useNavigate();
@@ -201,15 +222,224 @@ const ViewCarts = () => {
     }
   };
 
+  // --- Filtering Logic ---
+  const filteredCarts = carts.filter(cart => {
+    // 1. Component Search (by ID or Name nested in details)
+    const matchesComponent = componentSearch === '' || cart.details?.some(item =>
+      (item.ID?.toLowerCase().includes(componentSearch.toLowerCase())) ||
+      (item.Name?.toLowerCase().includes(componentSearch.toLowerCase()))
+    );
+
+    // 2. Vendor Search (by Name or ID)
+    const matchesVendor = vendorSearch === '' ||
+      (cart.vendorName?.toLowerCase().includes(vendorSearch.toLowerCase())) ||
+      (cart.vendorID?.toLowerCase().includes(vendorSearch.toLowerCase()));
+
+    // 3. Date Filter
+    // Format cart date to YYYY-MM-DD for comparison with input date
+    const cartDate = new Date(cart.crationDate).toISOString().split('T')[0];
+    const matchesDate = dateFilter === '' || cartDate === dateFilter;
+
+    return matchesComponent && matchesVendor && matchesDate;
+  });
+
+  const clearFilters = () => {
+    setComponentSearch('');
+    setVendorSearch('');
+    setDateFilter('');
+  };
+
+  // --- Summary PDF Logic ---
+  const generateSummaryPDF = (cart) => {
+    const doc = new jsPDF();
+    const pageWidth = doc.internal.pageSize.width;
+    const margin = 15;
+    let yPos = 20;
+
+    // Helper for styled sections
+    const addSectionHeader = (text, y) => {
+      doc.setFontSize(14);
+      doc.setFont('helvetica', 'bold');
+      doc.setTextColor(26, 35, 126); // Navy Blue
+      doc.text(text, margin, y);
+      doc.setDrawColor(200, 200, 200);
+      doc.line(margin, y + 2, pageWidth - margin, y + 2);
+      return y + 10;
+    };
+
+    const addLabelValue = (label, value, x, y) => {
+      doc.setFontSize(10);
+      doc.setFont('helvetica', 'bold');
+      doc.setTextColor(100);
+      doc.text(label + ':', x, y);
+      doc.setFont('helvetica', 'normal');
+      doc.setTextColor(0);
+      doc.text(String(value), x + 35, y);
+    };
+
+    // --- Title ---
+    doc.setFontSize(22);
+    doc.setFont('helvetica', 'bold');
+    doc.setTextColor(0, 0, 0);
+    doc.text("CART SUMMARY REPORT", margin, yPos);
+    yPos += 15;
+
+    // --- Cart Info ---
+    doc.setFontSize(10);
+    doc.setTextColor(100);
+    doc.text(`Generated: ${new Date().toLocaleString()}`, margin, yPos);
+    yPos += 10;
+
+    yPos = addSectionHeader("Cart Details", yPos);
+
+    // Row 1
+    addLabelValue("Cart ID", cart.ID, margin, yPos);
+    addLabelValue("Status", cart.checkIn ? "Checked In" : cart.ordered ? "Ordered" : "Pending", margin + 80, yPos);
+    yPos += 8;
+
+    // Row 2
+    const vendorName = cart.vendorName || 'N/A';
+    const vendorID = cart.vendorID || 'N/A';
+    addLabelValue("Vendor", `${vendorName} (${vendorID})`, margin, yPos);
+    yPos += 8;
+
+    // Row 3 (Dates)
+    addLabelValue("Created At", new Date(cart.crationDate).toLocaleDateString(), margin, yPos);
+    addLabelValue("Ordered At", cart.orderDate ? new Date(cart.orderDate).toLocaleDateString() : '-', margin + 80, yPos);
+    yPos += 8;
+    addLabelValue("Checked In", cart.checkInDate ? new Date(cart.checkInDate).toLocaleDateString() : '-', margin, yPos);
+    yPos += 15;
+
+    // --- Component Table ---
+    yPos = addSectionHeader("Component Details", yPos);
+
+    const tableHeaders = [['#', 'Comp ID', 'Name', 'Ordered', 'Recv', 'Dmg', 'Deficit', 'Status']];
+    const tableData = cart.details.map((item, index) => {
+      const deficitText = item.deflict?.number > 0 ? `${item.deflict.number} (${item.deflict.remark || ''})` : '-';
+      return [
+        index + 1,
+        item.ID,
+        item.Name,
+        item.orderedQuantity,
+        item.receivedQuantity ?? '-',
+        item.damageCount ?? '-',
+        deficitText,
+        item.checkIn ? 'OK' : 'Pending'
+      ];
+    });
+
+    autoTable(doc, {
+      startY: yPos,
+      head: tableHeaders,
+      body: tableData,
+      theme: 'striped',
+      headStyles: { fillColor: [41, 128, 185], textColor: 255, fontStyle: 'bold' },
+      styles: { fontSize: 9, cellPadding: 3, halign: 'center' },
+      columnStyles: {
+        2: { halign: 'left' } // Name alignment
+      },
+      margin: { left: margin, right: margin }
+    });
+
+    // --- Footer ---
+    const totalPages = doc.internal.getNumberOfPages();
+    for (let i = 1; i <= totalPages; i++) {
+      doc.setPage(i);
+      doc.setFontSize(8);
+      doc.setTextColor(150);
+      doc.text(`Page ${i} of ${totalPages}`, pageWidth - margin, 290, { align: 'right' });
+    }
+
+    doc.save(`Cart_Summary_${cart.ID}.pdf`);
+  };
+
   if (loading) return <div className="loader"></div>;
   if (error) return <div className="view-carts-container11 error11">{error}</div>;
 
   return (
     <div className="view-carts-container11">
-      <TopBarWithLogo title="All Carts" />
+
+
       <div className="mstt">
-        {carts.length === 0 ? (
-          <NoDataFound message="No carts available." />
+        {/* Filters Section */}
+        <Paper elevation={0} sx={{ p: 2, mb: 3, bgcolor: '#f8f9fa', borderRadius: 2 }}>
+          <Grid container spacing={2} alignItems="center">
+            <Grid item xs={12}>
+              <Box display="flex" alignItems="center" gap={1} mb={1}>
+                <FilterList color="primary" />
+                <Typography variant="subtitle2" fontWeight={700} color="text.secondary">
+                  FILTERS
+                </Typography>
+              </Box>
+            </Grid>
+
+            <Grid item xs={12} sm={4} md={4}>
+              <TextField
+                fullWidth
+                size="small"
+                label="Search Component (ID or Name)"
+                placeholder="e.g. Resistor, CMP123"
+                value={componentSearch}
+                onChange={(e) => setComponentSearch(e.target.value)}
+                InputProps={{
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <Inventory color="action" fontSize="small" />
+                    </InputAdornment>
+                  ),
+                }}
+                sx={{ bgcolor: 'white' }}
+              />
+            </Grid>
+
+            <Grid item xs={12} sm={3} md={3}>
+              <TextField
+                fullWidth
+                size="small"
+                label="Vendor (Name or ID)"
+                placeholder="Search Vendor..."
+                value={vendorSearch}
+                onChange={(e) => setVendorSearch(e.target.value)}
+                InputProps={{
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <Store color="action" fontSize="small" />
+                    </InputAdornment>
+                  ),
+                }}
+                sx={{ bgcolor: 'white' }}
+              />
+            </Grid>
+
+            <Grid item xs={12} sm={3} md={3}>
+              <TextField
+                fullWidth
+                size="small"
+                type="date"
+                label="Creation Date"
+                value={dateFilter}
+                onChange={(e) => setDateFilter(e.target.value)}
+                InputLabelProps={{ shrink: true }}
+                sx={{ bgcolor: 'white' }}
+              />
+            </Grid>
+
+            <Grid item xs={12} sm={2} md={2}>
+              <Button
+                fullWidth
+                variant="outlined"
+                color="secondary"
+                startIcon={<Clear />}
+                onClick={clearFilters}
+              >
+                Clear
+              </Button>
+            </Grid>
+          </Grid>
+        </Paper>
+
+        {filteredCarts.length === 0 ? (
+          <NoDataFound message="No carts match your filters." />
         ) : (
           <table className="cart-table11">
             <thead>
@@ -225,7 +455,7 @@ const ViewCarts = () => {
               </tr>
             </thead>
             <tbody>
-              {carts.map((cart) => (
+              {filteredCarts.map((cart) => (
                 <tr key={cart._id}>
                   <td>{cart.ID}</td>
                   <td>{cart.vendorID || 'N/A'}</td>
@@ -237,16 +467,23 @@ const ViewCarts = () => {
                     <button className="btn-view11" onClick={() => openDetailsModal(cart)}>View Details</button>
                   </td>
                   <td>
-                    {cart.checkIn ? (
-                      <button className="btn-pdf11" onClick={() => generatePDF(cart)}>Get PDF</button>
-                    ) : cart.ordered ? (
-                      <button className="btn-checkin11" onClick={() => handleCheckIn(cart)}>Check In</button>
-                    ) : (
-                      <>
-                        <button className="btn-order11" onClick={() => goToOrderPage(cart.ID)}>Order</button>
-                        <button className="btn-update11" onClick={() => handleUpdateCart(cart)}>Update</button>
-                      </>
-                    )}
+                    <div style={{ display: 'flex', gap: '5px', justifyContent: 'center' }}>
+                      <button className="btn-pdf11" style={{ backgroundColor: '#2c3e50' }} onClick={() => generateSummaryPDF(cart)} title="Download Internal Summary Report">
+                        Summary
+                      </button>
+                      {cart.checkIn ? (
+                        <button className="btn-pdf11" style={{ backgroundColor: '#27ae60' }} onClick={() => generatePDF(cart)} title="Download Supplier Order Letter">
+                          Order Letter
+                        </button>
+                      ) : cart.ordered ? (
+                        <button className="btn-checkin11" onClick={() => handleCheckIn(cart)}>Check In</button>
+                      ) : (
+                        <>
+                          <button className="btn-order11" onClick={() => goToOrderPage(cart.ID)}>Order</button>
+                          <button className="btn-update11" onClick={() => handleUpdateCart(cart)}>Update</button>
+                        </>
+                      )}
+                    </div>
                   </td>
                 </tr>
               ))}

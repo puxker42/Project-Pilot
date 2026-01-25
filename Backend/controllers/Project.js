@@ -149,9 +149,9 @@ exports.getAllProjects = async (req, res) => {
       }
     });
 
-    // Fetch User details (year, batch)
+    // Fetch User details (year, batch, name, email, etc)
     const users = await User.find({ userID: { $in: Array.from(studentUserIDs) } })
-      .select('userID year batch');
+      .select('userID year batch firstName lastName email image contactNumber');
 
     // Create a map for quick lookup
     const userMap = {};
@@ -165,6 +165,20 @@ exports.getAllProjects = async (req, res) => {
       let projectBatch = p.batch; // Default to project's stored batch
 
       if (p.teamID && p.teamID.members && p.teamID.members.length > 0) {
+
+        // Enrich members with user details
+        p.teamID.members = p.teamID.members.map(member => {
+          const user = userMap[Number(member.userID)];
+          return {
+            ...member,
+            firstName: user ? user.firstName : undefined,
+            lastName: user ? user.lastName : undefined,
+            email: user ? user.email : undefined,
+            image: user ? user.image : undefined,
+            contactNumber: user ? user.contactNumber : undefined
+          };
+        });
+
         // Find the lead or first member to determine Year
         const leadMember = p.teamID.members.find(m => m.role === 'Lead') || p.teamID.members[0];
         const user = userMap[Number(leadMember.userID)];

@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import './CheckIn.css';
 import { useLocation, useNavigate } from 'react-router-dom';
-import TopbarWithLogo from '../TopBarWithLogo';
+
 const BASE_URL = process.env.REACT_APP_API_BASE_URL;
 
 const CheckIn = () => {
@@ -139,7 +139,7 @@ const CheckIn = () => {
 
   return (
     <div className="checkin-container">
-      <TopbarWithLogo title={str} />
+      <h2>{str}</h2>
       <table className="checkin-table">
         <thead>
           <tr>

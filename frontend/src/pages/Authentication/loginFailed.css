@@ -1,50 +1,54 @@
 .login-failed-container {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
-    background-color: #f4f6f9;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  }
-  
-  .login-failed-box {
-    background-color: #ffffff;
-    padding: 40px;
-    border-radius: 20px;
-    box-shadow: 0px 0px 15px rgba(0, 0, 0, 0.1);
-    text-align: center;
-    max-width: 400px;
-  }
-  
-  .login-failed-logo {
-    width: 80px;
-    height: auto;
-    margin-bottom: 20px;
-  }
-  
-  .login-failed-box h1 {
-    color: #d9534f;
-    font-size: 28px;
-  }
-  
-  .login-failed-box p {
-    font-size: 16px;
-    color: #555;
-    margin: 20px 0;
-  }
-  
-  .login-failed-box button {
-    background-color: #007bff;
-    color: white;
-    padding: 10px 22px;
-    border: none;
-    border-radius: 8px;
-    cursor: pointer;
-    font-size: 15px;
-    transition: background-color 0.3s ease;
-  }
-  
-  .login-failed-box button:hover {
-    background-color: #0056b3;
-  }
-  
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  background: linear-gradient(135deg, #eef2f3 0%, #8e9eab 100%);
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  overflow: hidden;
+}
+
+.login-failed-box {
+  background: rgba(255, 255, 255, 0.95);
+  padding: 50px 40px;
+  border-radius: 20px;
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+  text-align: center;
+  max-width: 420px;
+  width: 90%;
+  border: 1px solid rgba(255, 255, 255, 1);
+}
+
+.login-failed-icon {
+  font-size: 80px;
+  color: #ff4d4f;
+  margin-bottom: 20px;
+  filter: drop-shadow(0 4px 6px rgba(255, 77, 79, 0.2));
+}
+
+.login-failed-box h1 {
+  color: #333;
+  font-size: 32px;
+  margin-bottom: 10px;
+  font-weight: 700;
+}
+
+.login-failed-box p {
+  font-size: 16px;
+  color: #666;
+  margin-bottom: 30px;
+  line-height: 1.6;
+}
+
+.login-failed-box button {
+  background: linear-gradient(90deg, #ff4d4f 0%, #ff7875 100%);
+  color: white;
+  padding: 12px 32px;
+  border: none;
+  border-radius: 50px;
+  cursor: pointer;
+  font-size: 16px;
+  font-weight: 600;
+  box-shadow: 0 6px 15px rgba(255, 77, 79, 0.3);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}

@@ -5,6 +5,7 @@ import SignUp from '../pages/Authentication/SignUp';
 import AdminDashboard from '../pages/AdminDashboard/AdminDashboard';
 import StudentDashboard from '../pages/UserDashBoard/StudentDashboard';
 import ManagerDashboard from '../pages/ManagerDashboard/ManagerDashboard';
+import ManagerLayout from '../pages/ManagerDashboard/ManagerLayout';
 import InstructorDashboard from '../pages/InstructorDashBoard/InstructorDashboard';
 import LoginFailed from '../pages/Authentication/LogFail';
 import SignSuc from '../pages/Authentication/signSuc';
@@ -41,9 +42,16 @@ import ResetPassword from '../pages/Authentication/ResetPassword';
 import Requirement from '../pages/ManagerDashboard/Requirements';
 import PendingComponentsPage from '../pages/PendingComponentsPage';
 import GenerateReports from '../pages/ManagerDashboard/Reports/GenerateReports';
+import ComponentWiseStockReport from '../pages/ManagerDashboard/Reports/ComponentWiseStockReport';
+import DayWiseStockReport from '../pages/ManagerDashboard/Reports/DayWiseStockReport';
+import CertificateGenerator from '../pages/ManagerDashboard/Reports/CertificateGenerator';
 import DeveloperDashboard from '../pages/DeveloperDashboard/DeveloperDashboard';
 import DatabaseViewer from '../pages/DeveloperDashboard/DatabaseViewer';
 import DeveloperUserManagement from '../pages/DeveloperDashboard/DeveloperUserManagement';
+import AccessDenied from '../pages/AccessDenied';
+import RoleBasedRoute from './RoleBasedRoute';
+import VisitorDashboard from '../pages/VisitorDashboard/VisitorDashboard';
+
 const AppRoutes = () => (
   <Routes>
     {/* Public Routes */}
@@ -55,46 +63,98 @@ const AppRoutes = () => (
     <Route path="/sign-fail" element={<SignFail />} />
     <Route path="/auth/forgot-pass" element={<ForgotPassword />} />
     <Route path='/auth/reset-password' element={<ResetPassword />} />
+    <Route path="/access-denied" element={<AccessDenied />} />
+
+
 
     {/* Protected Routes - Dashboards */}
-    <Route path="/admin-dashboard" element={<PrivateRoutes><AdminDashboard /></PrivateRoutes>} />
-    <Route path="/student-dashboard" element={<PrivateRoutes><StudentDashboard /></PrivateRoutes>} />
-    <Route path="/manager-dashboard" element={<PrivateRoutes><ManagerDashboard /></PrivateRoutes>} />
-    <Route path="/instructor-dashboard" element={<PrivateRoutes><InstructorDashboard /></PrivateRoutes>} />
-    <Route path="/developer-dashboard" element={<PrivateRoutes><DeveloperDashboard /></PrivateRoutes>} />
-    <Route path="/developer-database" element={<PrivateRoutes><DatabaseViewer /></PrivateRoutes>} />
-    <Route path="/developer-users" element={<PrivateRoutes><DeveloperUserManagement /></PrivateRoutes>} />
+    <Route path="/visitor-dashboard" element={
+      <RoleBasedRoute allowedRoles={['Visitor']}>
+        <VisitorDashboard />
+      </RoleBasedRoute>
+    } />
+    <Route path="/admin-dashboard" element={
+      <RoleBasedRoute allowedRoles={['Admin']}>
+        <AdminDashboard />
+      </RoleBasedRoute>
+    } />
+    <Route path="/student-dashboard" element={
+      <RoleBasedRoute allowedRoles={['Student', 'student']}>
+        <StudentDashboard />
+      </RoleBasedRoute>
+    } />
+    <Route path="/instructor-dashboard" element={
+      <RoleBasedRoute allowedRoles={['Instructor', 'instructor', 'Faculty', 'faculty']}>
+        <InstructorDashboard />
+      </RoleBasedRoute>
+    } />
+    <Route path="/developer-dashboard" element={
+      <RoleBasedRoute allowedRoles={['Developer']}>
+        <DeveloperDashboard />
+      </RoleBasedRoute>
+    } />
+    <Route path="/developer-database" element={
+      <RoleBasedRoute allowedRoles={['Developer']}>
+        <DatabaseViewer />
+      </RoleBasedRoute>
+    } />
+    <Route path="/developer-users" element={
+      <RoleBasedRoute allowedRoles={['Developer']}>
+        <DeveloperUserManagement />
+      </RoleBasedRoute>
+    } />
 
     {/* Protected Routes - Project & Team */}
     <Route path="/create-project" element={<PrivateRoutes><ProjectWizard /></PrivateRoutes>} />
     <Route path="/create-team" element={<PrivateRoutes><CreateTeam /></PrivateRoutes>} />
-    {/* <Route path="/projects" element={<PrivateRoutes><ProjectsAssociated /></PrivateRoutes>} /> */}
     <Route path="/update-project" element={<PrivateRoutes><UnderConstruction /></PrivateRoutes>} />
-    <Route path='/all-projects' element={<PrivateRoutes><ProjectDashboard /></PrivateRoutes>} />
+
     {/* Protected Routes - Status Pages */}
     <Route path="/project-fail" element={<PrivateRoutes><FailurePage /></PrivateRoutes>} />
     <Route path="/project-success" element={<PrivateRoutes><SuccessPage /></PrivateRoutes>} />
 
     {/* Instructor Routes */}
-    <Route path='/projects-to-approve' element={<PrivateRoutes><ProjectApprovalManager /></PrivateRoutes>} />
-    <Route path='/projects-under-me' element={<PrivateRoutes><GuidedProjects /></PrivateRoutes>} />
-    {/*Managet Routes */}
-    <Route path='/search-components' element={<PrivateRoutes><Inventory /></PrivateRoutes>} />
-    <Route path='/get-order' element={<PrivateRoutes><RequirementManager /></PrivateRoutes>} />
-    <Route path='/view-carts' element={<PrivateRoutes><ViewCarts /></PrivateRoutes>} />
-    <Route path='/cart-order/:cartID' element={<PrivateRoutes><Order /></PrivateRoutes>} />
-    <Route path="/cart-check-in/:id" element={<PrivateRoutes><CheckIn /></PrivateRoutes>} />
-    <Route path='/check-in' element={<PrivateRoutes><CheckInLand /></PrivateRoutes>} />
-    <Route path='/create-component' element={<PrivateRoutes><CreateComponent /></PrivateRoutes>} />
-    <Route path='/assign-slot' element={<PrivateRoutes><AssignSlots /></PrivateRoutes>} />
-    <Route path='/check-out' element={<PrivateRoutes><Distribute /></PrivateRoutes>} />
+    <Route path='/projects-to-approve' element={
+      <RoleBasedRoute allowedRoles={['Instructor', 'instructor', 'Faculty', 'faculty']}>
+        <ProjectApprovalManager />
+      </RoleBasedRoute>
+    } />
+    <Route path='/projects-under-me' element={
+      <RoleBasedRoute allowedRoles={['Instructor', 'instructor', 'Faculty', 'faculty']}>
+        <GuidedProjects />
+      </RoleBasedRoute>
+    } />
+
+    {/* Manager Routes with Layout */}
+    <Route element={
+      <RoleBasedRoute allowedRoles={['Manager', 'manager']}>
+        <ManagerLayout />
+      </RoleBasedRoute>
+    }>
+      <Route path="/manager-dashboard" element={<ManagerDashboard />} />
+      <Route path='/all-projects' element={<ProjectDashboard />} />
+      <Route path='/search-components' element={<Inventory />} />
+      <Route path='/get-order' element={<RequirementManager />} />
+      <Route path='/view-carts' element={<ViewCarts />} />
+      <Route path='/cart-order/:cartID' element={<Order />} />
+      <Route path="/cart-check-in/:id" element={<CheckIn />} />
+      <Route path='/check-in' element={<CheckInLand />} />
+      <Route path='/create-component' element={<CreateComponent />} />
+      <Route path='/assign-slot' element={<AssignSlots />} />
+      <Route path='/check-out' element={<Distribute />} />
+      <Route path='/project-in' element={<ProjectCheckIn />} />
+      <Route path='/view-requirements/fetch' element={<Requirement />} />
+      <Route path='/pending-components' element={<PendingComponentsPage />} />
+      <Route path='/generate-reports' element={<GenerateReports />} />
+      <Route path='/generate-certificate' element={<CertificateGenerator />} />
+      <Route path='/report-day-wise' element={<DayWiseStockReport />} />
+      <Route path='/report-component-wise' element={<ComponentWiseStockReport />} />
+    </Route>
+
     <Route path="/student/acknowledgement/:projectID/:token" element={<VerifyDelivery />} />
-    <Route path='/project-in' element={<PrivateRoutes><ProjectCheckIn /></PrivateRoutes>} />
     <Route path='/my-projects' element={<PrivateRoutes><MyProjects /></PrivateRoutes>} />
     <Route path='/my-teams' element={<PrivateRoutes><MyTeams /></PrivateRoutes>} />
-    <Route path='/view-requirements/fetch' element={<PrivateRoutes><Requirement /></PrivateRoutes>} />
-    <Route path='/pending-components' element={<PrivateRoutes><PendingComponentsPage /></PrivateRoutes>} />
-    <Route path='/generate-reports' element={<PrivateRoutes><GenerateReports /></PrivateRoutes>} />
+
     <Route path="*" element={<PageNotFound />} />
   </Routes>
 );

@@ -55,6 +55,10 @@ function Login() {
             navigate(`/developer-dashboard${tokenParam}`);
             localStorage.setItem('homePath', `/developer-dashboard${tokenParam}`);
             break;
+          case 'Visitor':
+            navigate(`/visitor-dashboard${tokenParam}`);
+            localStorage.setItem('homePath', `/visitor-dashboard${tokenParam}`);
+            break;
           default:
             navigate(`/student-dashboard${tokenParam}`);
             localStorage.setItem('homePath', `/student-dashboard${tokenParam}`);

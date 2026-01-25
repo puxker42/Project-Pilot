@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
-import TopBarWithLogo from '../TopBarWithLogo';
-import Footer from '../../../components/Footer';
+import React, { useState, useEffect } from 'react';
+
+
 import './GenerateReports.css';
 import { FaFileInvoice, FaCalendarAlt, FaDownload, FaTable, FaFilter } from 'react-icons/fa';
 import axios from 'axios';
@@ -14,6 +14,24 @@ const GenerateReports = () => {
     const [loading, setLoading] = useState(false);
     const [reportData, setReportData] = useState(null);
     const [generatedReportType, setGeneratedReportType] = useState('');
+    const [userRole, setUserRole] = useState('');
+
+    useEffect(() => {
+        const fetchUserRole = async () => {
+            try {
+                const token = localStorage.getItem('token');
+                const response = await axios.get(`${BASE_URL}/me`, {
+                    headers: { Authorization: `Bearer ${token}` }
+                });
+                if (response.data.success) {
+                    setUserRole(response.data.data.accountType);
+                }
+            } catch (error) {
+                console.error("Error fetching user role:", error);
+            }
+        };
+        fetchUserRole();
+    }, []);
 
     // State for Project Reports
     const [projectReportMode, setProjectReportMode] = useState('summary'); // summary, contact, detailed, custom
@@ -26,7 +44,7 @@ const GenerateReports = () => {
     });
 
     // State for Certificate Generation
-    const [certificateProjectId, setCertificateProjectId] = useState('');
+
 
     const [projectCustomOptions, setProjectCustomOptions] = useState({
         includeId: true,
@@ -324,45 +342,7 @@ const GenerateReports = () => {
         }
     };
 
-    const handleDownloadCertificate = async () => {
-        if (!certificateProjectId.trim()) {
-            alert("Please enter a valid Project ID.");
-            return;
-        }
 
-        setLoading(true);
-        try {
-            const token = localStorage.getItem('token');
-            const response = await fetch(`${BASE_URL}/generate-certificate`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
-                },
-                body: JSON.stringify({ projectId: certificateProjectId.trim() })
-            });
-
-            if (response.ok) {
-                const blob = await response.blob();
-                const url = window.URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = `Certificate-${certificateProjectId}.pdf`;
-                document.body.appendChild(a);
-                a.click();
-                a.remove();
-                window.URL.revokeObjectURL(url);
-            } else {
-                const data = await response.json();
-                alert(data.message || "Failed to generate certificate. Please check the Project ID.");
-            }
-        } catch (error) {
-            console.error("Certificate download error:", error);
-            alert("An error occurred while downloading the certificate.");
-        } finally {
-            setLoading(false);
-        }
-    };
 
 
     // Helper to get value for filtering
@@ -732,8 +712,8 @@ const GenerateReports = () => {
 
 
     return (
-        <div className="manager-dashboard">
-            <TopBarWithLogo title="Generate Reports" />
+        <div className={userRole === 'Admin' ? "admin-dashboard" : "manager-dashboard"}>
+
 
             <div className="gen-rep-container">
                 <div className="gen-rep-header">
@@ -771,34 +751,11 @@ const GenerateReports = () => {
                                         <option value="contact">Contact List Focus</option>
                                         <option value="detailed">Full Detailed Report</option>
                                         <option value="custom">Custom Configuration</option>
-                                        <option value="certificate">Certificate Generation</option>
+
                                     </select>
                                 </div>
 
-                                {projectReportMode === 'certificate' ? (
-                                    <div className="gen-rep-certificate-section">
-                                        <h3>Generate Project Certificate</h3>
-                                        <p>Enter the Project ID to generate and download the official certificate.</p>
-                                        <div className="gen-rep-form-group" style={{ maxWidth: '400px', margin: '20px 0' }}>
-                                            <label>Project ID</label>
-                                            <input
-                                                type="text"
-                                                className="gen-rep-form-control"
-                                                placeholder="e.g. PRJ12345"
-                                                value={certificateProjectId}
-                                                onChange={(e) => setCertificateProjectId(e.target.value)}
-                                            />
-                                        </div>
-                                        <button
-                                            className="gen-rep-generate-btn"
-                                            onClick={handleDownloadCertificate}
-                                            disabled={loading}
-                                            style={{ backgroundColor: '#e74c3c' }}
-                                        >
-                                            {loading ? 'Generating...' : 'Download Certificate'}
-                                        </button>
-                                    </div>
-                                ) : (
+                                {false ? (null) : (
                                     <>
                                         <div className="gen-rep-filters-row">
                                             <div className="gen-rep-form-group third">
@@ -997,8 +954,7 @@ const GenerateReports = () => {
                                             <option value="in_stock">Stock In History</option>
                                             <option value="out_project">Stock Out (Projects)</option>
                                             <option value="out_distribution">Stock Out (Distribution)</option>
-                                            <option value="day_wise">Day Wise Stock Report</option>
-                                            <option value="component_wise">Component Wise Stock</option>
+
                                         </select>
                                     </div>
                                     <div className="gen-rep-form-group hover-effect">
@@ -1048,7 +1004,7 @@ const GenerateReports = () => {
                         )}
                     </div>
                 </div>
-                <Footer />
+
             </div>
         </div>
     );

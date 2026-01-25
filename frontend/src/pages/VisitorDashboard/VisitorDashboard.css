@@ -1,0 +1,351 @@
+/* VisitorDashboard.css */
+
+.visitor-dashboard {
+    font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    padding: 2rem;
+    background-color: #f4f7f6;
+    min-height: 100vh;
+    color: #333;
+}
+
+.visitor-header {
+    text-align: center;
+    margin-bottom: 3rem;
+    background: white;
+    padding: 2rem;
+    border-radius: 12px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+    position: relative;
+}
+
+.header-content {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+    margin-bottom: 1rem;
+}
+
+.visitor-header h1 {
+    font-size: 2.5rem;
+    color: #2c3e50;
+    margin: 0;
+}
+
+.logout-button {
+    position: absolute;
+    right: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    background-color: #e74c3c;
+    color: white;
+    border: none;
+    padding: 0.5rem 1.5rem;
+    border-radius: 6px;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.logout-button:hover {
+    background-color: #c0392b;
+}
+
+.disclaimer-text {
+    font-size: 1.1rem;
+    color: #e67e22;
+    /* Warning orange */
+    font-weight: 600;
+    border: 1px solid #ffd791;
+    background-color: #fff8e1;
+    padding: 0.75rem 1.5rem;
+    display: inline-block;
+    border-radius: 8px;
+}
+
+.dashboards-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 3rem;
+}
+
+.dashboard-section {
+    display: flex;
+    align-items: center;
+    background: white;
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+    transition: transform 0.3s ease;
+}
+
+.dashboard-section:hover {
+    transform: translateY(-5px);
+}
+
+.dashboard-section.reversed {
+    flex-direction: row-reverse;
+}
+
+.dashboard-info {
+    flex: 1;
+    padding: 3rem;
+}
+
+.dashboard-info h2 {
+    font-size: 2rem;
+    color: #2c3e50;
+    margin-bottom: 1rem;
+    border-bottom: 2px solid #3498db;
+    display: inline-block;
+    padding-bottom: 0.5rem;
+}
+
+.dashboard-info p {
+    font-size: 1.1rem;
+    line-height: 1.6;
+    color: #555;
+    margin-bottom: 1.5rem;
+}
+
+.dashboard-info ul {
+    list-style: none;
+    padding: 0;
+}
+
+.dashboard-info ul li {
+    margin-bottom: 0.8rem;
+    padding-left: 1.5rem;
+    position: relative;
+}
+
+.dashboard-info ul li::before {
+    content: '•';
+    color: #3498db;
+    font-weight: bold;
+    position: absolute;
+    left: 0;
+    font-size: 1.2rem;
+}
+
+/* CSS Update for Image Gallery */
+
+.dashboard-media {
+    flex: 1.2;
+    padding: 1rem;
+    background: #f8f9fa;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+.dashboard-main-img {
+    width: 100%;
+    border-radius: 8px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    border: 1px solid #e1e8ed;
+}
+
+/* Column Layout for Manager Section */
+.col-layout {
+    flex-direction: column;
+    text-align: center;
+    padding: 2rem;
+}
+
+.section-intro {
+    margin-bottom: 2rem;
+    max-width: 800px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.feature-showcase {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+}
+
+.showcase-item {
+    background: white;
+    padding: 10px;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    transition: transform 0.2s;
+}
+
+.showcase-item:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.12);
+}
+
+.showcase-item img {
+    width: 100%;
+    height: auto;
+    border-radius: 4px;
+}
+
+.main-view {
+    max-width: 900px;
+    margin: 0 auto;
+}
+
+.features-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1.5rem;
+    width: 100%;
+}
+
+.caption {
+    margin-top: 0.5rem;
+    font-size: 0.9rem;
+    color: #666;
+    font-weight: 500;
+}
+
+.dashboard-image-placeholder {
+    flex: 1;
+    background-color: #ecf0f1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+    border-left: 1px solid #eee;
+}
+
+.reversed .dashboard-image-placeholder {
+    border-left: none;
+    border-right: 1px solid #eee;
+}
+
+.dashboard-img {
+    max-width: 100%;
+    height: auto;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    border: 1px solid #ddd;
+}
+
+.img-caption {
+    margin-top: 1rem;
+    font-size: 0.9rem;
+    color: #7f8c8d;
+}
+
+.img-caption code {
+    background-color: #eee;
+    padding: 0.2rem 0.4rem;
+    border-radius: 4px;
+    font-family: monospace;
+}
+
+.image-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.85);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    animation: fadeIn 0.3s ease;
+}
+
+.image-modal-content {
+    position: relative;
+    max-width: 90vw;
+    max-height: 90vh;
+    background: transparent;
+    padding: 0;
+    border-radius: 8px;
+    box-shadow: 0 5px 30px rgba(0, 0, 0, 0.3);
+}
+
+.enlarged-img {
+    max-width: 100%;
+    max-height: 90vh;
+    border-radius: 4px;
+    display: block;
+}
+
+.close-modal-btn {
+    position: absolute;
+    top: -40px;
+    right: -40px;
+    background: transparent;
+    border: none;
+    font-size: 3rem;
+    color: white;
+    cursor: pointer;
+    line-height: 1;
+    transition: transform 0.2s;
+}
+
+.close-modal-btn:hover {
+    transform: scale(1.1);
+    color: #ff6b6b;
+}
+
+.clickable-img {
+    cursor: zoom-in;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.clickable-img:hover {
+    transform: scale(1.02);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+}
+
+.wizard-title {
+    width: 100%;
+    text-align: center;
+    font-size: 1.5rem;
+    color: #2c3e50;
+    margin: 2rem 0 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid #e1e8ed;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+/* Response Fixes for Modal */
+@media (max-width: 768px) {
+    .close-modal-btn {
+        top: -40px;
+        right: 0;
+    }
+}
+
+@media (max-width: 768px) {
+
+    .dashboard-section,
+    .dashboard-section.reversed {
+        flex-direction: column;
+    }
+
+    .dashboard-image-placeholder {
+        width: 100%;
+        border: none;
+        border-top: 1px solid #eee;
+    }
+
+    .visitor-header h1 {
+        font-size: 2rem;
+    }
+}

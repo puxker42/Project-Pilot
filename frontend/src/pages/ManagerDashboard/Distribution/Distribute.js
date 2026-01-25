@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import './Distribute.css';
-import TopbarWithLogo from '../TopBarWithLogo';
-import NoDataFound from '../../../components/NoDataFound';
+
+import AnimatedEmptyState from '../../../components/AnimatedEmptyState';
 
 const BASE_URL = process.env.REACT_APP_API_BASE_URL;
 
@@ -25,6 +25,11 @@ const Distribute = () => {
   const [importedProjects, setImportedProjects] = useState([]);
   const [assignStatus, setAssignStatus] = useState(null);
   const [masterComponents, setMasterComponents] = useState([]);
+
+  // Import Modal State
+  const [showImportModal, setShowImportModal] = useState(false);
+  const [importInput, setImportInput] = useState("");
+  const [importError, setImportError] = useState("");
 
   useEffect(() => {
     fetchProjects();
@@ -191,6 +196,36 @@ const Distribute = () => {
     }
   };
 
+  const openImportModal = () => {
+    setImportInput("");
+    setImportError("");
+    setShowImportModal(true);
+  };
+
+  const handleImportProject = () => {
+    if (!importInput) {
+      setImportError("Please enter a Project ID.");
+      return;
+    }
+
+    const trimmedID = importInput.trim().toLowerCase();
+    const importedAndFiltered = [...filteredProjects, ...importedProjects];
+
+    const alreadyShown = importedAndFiltered.some(p => p.ID.trim().toLowerCase() === trimmedID);
+    if (alreadyShown) {
+      setImportError("This project is already visible.");
+      return;
+    }
+
+    const match = projects.find(p => p.ID.trim().toLowerCase() === trimmedID);
+    if (match) {
+      setImportedProjects(prev => [...prev, match]);
+      setShowImportModal(false);
+    } else {
+      setImportError("Project ID not found.");
+    }
+  };
+
 
   const currentDate = new Date().toLocaleString('en-IN', {
     dateStyle: 'full',
@@ -202,14 +237,14 @@ const Distribute = () => {
 
   return (
     <div className="distribute-container">
-      <TopbarWithLogo title="Component Delivery Master" />
+
       <div className="marginn">
         <h2>Slot Projects</h2>
         <p><strong>Current Date & Time:</strong> {currentDate}</p>
         <p><strong>Projects in Current Slot:</strong> {filteredProjects.length}</p>
 
         {importedAndFiltered.length === 0 ? (
-          <NoDataFound message="No projects found for this slot." />
+          <AnimatedEmptyState message="No projects found for this slot." />
         ) : (
           <div className="project-table-container">
             <table className="project-table">
@@ -256,16 +291,7 @@ const Distribute = () => {
         )}
 
         <div className="import-link">
-          <a onClick={() => {
-            const input = prompt("Enter the Project ID to import:");
-            if (!input) return;
-            const trimmedID = input.trim().toLowerCase();
-            const alreadyShown = importedAndFiltered.some(p => p.ID.trim().toLowerCase() === trimmedID);
-            if (alreadyShown) return alert("This project is already visible.");
-            const match = projects.find(p => p.ID.trim().toLowerCase() === trimmedID);
-            if (match) setImportedProjects(prev => [...prev, match]);
-            else alert("Project ID not found.");
-          }}>Import project from other slot</a>
+          <a onClick={openImportModal}>Import project from other slot</a>
         </div>
 
         {/* Assignment Popup */}
@@ -338,6 +364,45 @@ const Distribute = () => {
                   </div>
                 </>
               )}
+            </div>
+          </div>
+        )}
+
+        {/* Import Project Modal */}
+        {showImportModal && (
+          <div className="assign-popup">
+            <div className="popup-content" style={{ maxWidth: '500px' }}>
+              <h3>Import Project</h3>
+              <p>Enter the Project ID to import project from another slot into this view.</p>
+
+              <div style={{ margin: '20px 0' }}>
+                <input
+                  type="text"
+                  placeholder="Enter Project ID (e.g. PRJ001)"
+                  value={importInput}
+                  onChange={(e) => {
+                    setImportInput(e.target.value);
+                    setImportError("");
+                  }}
+                  style={{
+                    width: '100%',
+                    padding: '10px 12px',
+                    borderRadius: '6px',
+                    border: '1px solid #ccc',
+                    fontSize: '16px'
+                  }}
+                />
+                {importError && (
+                  <p className="error-msg" style={{ marginTop: '8px', fontSize: '14px' }}>
+                    {importError}
+                  </p>
+                )}
+              </div>
+
+              <div className="popup-actions">
+                <button className="accept-btn" onClick={handleImportProject}>Import</button>
+                <button className="close-btn" onClick={() => setShowImportModal(false)}>Cancel</button>
+              </div>
             </div>
           </div>
         )}

@@ -3,8 +3,8 @@ import axios from 'axios';
 import './AssignSlots.css';
 import { useNavigate } from 'react-router-dom';
 import ProjectPopup from './ProjectPopup';
-import TopbarWithLogo from '../TopBarWithLogo';
-import NoDataFound from '../../../components/NoDataFound'; // ✅ Import here
+
+import AnimatedEmptyState from '../../../components/AnimatedEmptyState';
 
 const BASE_URL = process.env.REACT_APP_API_BASE_URL;
 
@@ -101,7 +101,7 @@ const AssignSlots = () => {
 
   return (
     <div className="assign-container">
-      <TopbarWithLogo  />
+
       <div className="masst">
         <div className="input-group">
           <label>Select Date:</label>
@@ -157,7 +157,7 @@ const AssignSlots = () => {
         <div className="project-table">
           <h3>Live Projects</h3>
           {filteredProjects.length === 0 ? (
-            <NoDataFound message="No live projects available for this filter." />
+            <AnimatedEmptyState message="No live projects available for this filter." />
           ) : (
             <table>
               <thead>

@@ -3,7 +3,8 @@
   padding: 20px;
   font-family: Arial, sans-serif;
 }
-.mst1{
+
+.mst1 {
   margin: 5rem;
 }
 
@@ -146,25 +147,119 @@
   border-radius: 6px;
   font-family: Arial, sans-serif;
 }
+
 .component-table1 th:first-child {
   width: 40px;
   text-align: center;
 }
+
 .controls1 {
   display: flex;
   justify-content: space-between;
   margin-bottom: 1rem;
   gap: 1rem;
+  flex-wrap: wrap;
+  /* Allow wrapping on smaller desktop screens */
 }
 
 .search-input1 {
-  width: 60%; /* Previously 60% */
+  width: 40%;
+  /* Reduced to allow space for filters */
+  padding: 0.5rem;
+  font-size: 1rem;
+  min-width: 200px;
+}
+
+.filter-select1 {
+  width: auto;
+  /* Allow auto width based on content */
+  min-width: 150px;
+  /* Ensure minimum readable width */
+  flex: 1;
+  /* Allow growing */
   padding: 0.5rem;
   font-size: 1rem;
 }
 
-.filter-select1 {
-  width: 5%; /* Previously default/small */
-  padding: 0.5rem;
-  font-size: 1rem;
+/* Mobile View Transformation */
+@media (max-width: 768px) {
+
+  /* Stack controls vertically */
+  .controls1 {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .search-input1,
+  .filter-select1 {
+    width: 100%;
+    /* Full width on mobile */
+  }
+
+  /* Hide the table header */
+  .mobile-hidden-header {
+    display: none;
+  }
+
+  /* Make table scrollable or block */
+  .project-table1 {
+    display: block;
+    width: 100%;
+  }
+
+  .project-table1 tbody {
+    display: block;
+    width: 100%;
+  }
+
+  /* Transform rows into cards */
+  .project-mobile-card {
+    display: block;
+    background: #fff;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    margin-bottom: 15px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+    padding: 15px;
+    position: relative;
+  }
+
+  /* Transform cells into block elements with labels */
+  .project-mobile-row-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border: none !important;
+    /* Override default table border */
+    border-bottom: 1px solid #f0f0f0 !important;
+    padding: 10px 0 !important;
+    text-align: right !important;
+    font-size: 14px;
+  }
+
+  /* Remove border from last item */
+  .project-mobile-row-content:last-child {
+    border-bottom: none !important;
+    padding-bottom: 0 !important;
+    justify-content: center;
+    /* Center the button */
+    padding-top: 15px !important;
+  }
+
+  /* Add labels using the data-label attribute */
+  .project-mobile-row-content::before {
+    content: attr(data-label);
+    font-weight: 600;
+    color: #555;
+    text-align: left;
+    margin-right: 15px;
+    flex-shrink: 0;
+    /* Prevent label from shrinking */
+  }
+
+  /* Ensure button fits nicely */
+  .view-btn1 {
+    width: 100%;
+    padding: 10px;
+  }
 }

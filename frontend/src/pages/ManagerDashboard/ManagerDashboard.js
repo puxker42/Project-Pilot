@@ -1,9 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import './ManagerDashboard.css';
 import { useNavigate } from 'react-router-dom';
-import TopBarWithLogo from './TopBarWithLogo';
-import Footer from '../../components/Footer';
-import { FaProjectDiagram, FaShoppingCart, FaSearch, FaClipboardList, FaPlusSquare, FaCalendarCheck, FaTruck, FaWarehouse, FaTasks, FaFileAlt } from 'react-icons/fa';
+import { FaProjectDiagram, FaShoppingCart, FaSearch, FaClipboardList, FaPlusSquare, FaCalendarCheck, FaTruck, FaWarehouse, FaTasks, FaFileAlt, FaCertificate, FaCalendarDay, FaChartPie } from 'react-icons/fa';
 import axios from 'axios';
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
@@ -72,7 +70,10 @@ const ManagerDashboard = () => {
     { name: 'Assign Slots', path: '/assign-slot', icon: <FaCalendarCheck />, color: '#858796' },
     { name: 'Distribute Components', path: '/check-out', icon: <FaTruck />, color: '#5a5c69' },
     { name: 'Generate Reports', path: '/generate-reports', icon: <FaFileAlt />, color: '#fd7e14' },
-    { name: 'Check-In', path: '/check-in', icon: <FaWarehouse />, color: '#2e59d9' }
+    { name: 'Check-In', path: '/check-in', icon: <FaWarehouse />, color: '#2e59d9' },
+    { name: 'Certificate Gen', path: '/generate-certificate', icon: <FaCertificate />, color: '#e74c3c' },
+    { name: 'Day Wise Stock', path: '/report-day-wise', icon: <FaCalendarDay />, color: '#20c997' },
+    { name: 'Comp. Wise Stock', path: '/report-component-wise', icon: <FaChartPie />, color: '#6610f2' }
   ];
 
   const handleNavigation = (path) => {
@@ -122,8 +123,6 @@ const ManagerDashboard = () => {
 
   return (
     <div className="manager-dashboard">
-      <TopBarWithLogo title="Manager Dashboard" />
-
       <div className="dashboard-container">
         {/* Welcome Section */}
         <div className="welcome-banner">
@@ -269,7 +268,7 @@ const ManagerDashboard = () => {
         )}
       </div>
 
-      <Footer />
+
     </div>
   );
 };

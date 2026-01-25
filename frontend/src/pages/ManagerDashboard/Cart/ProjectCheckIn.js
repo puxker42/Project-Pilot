@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import "./ProjectCheckIn.css";
-import TopbarWithLogo from '../TopBarWithLogo';
+import { FaWarehouse, FaSearch, FaExclamationTriangle, FaList, FaCheck, FaTimes } from "react-icons/fa";
+
 
 const BASE_URL = process.env.REACT_APP_API_BASE_URL;
 
@@ -147,9 +148,9 @@ export default function ProjectCheckIn() {
 
   return (
     <div>
-      <TopbarWithLogo title='Project Return Master' />
+
       <div className="pc-container">
-        <h1>Project Check‑In</h1>
+        <h1><FaWarehouse className="icon-space" /> Project Check‑In</h1>
         <div className="pc-search">
           <input
             type="text"
@@ -157,12 +158,12 @@ export default function ProjectCheckIn() {
             onChange={(e) => setInputID(e.target.value)}
             placeholder="Enter Project ID (e.g., PRJ12345)"
           />
-          <button onClick={handleSearch}>Search</button>
+          <button onClick={handleSearch}><FaSearch className="icon-space" /> Search</button>
         </div>
 
         {completedProjectFound && (
           <div className="pc-warning">
-            This project is already <strong>completed</strong>. Check‑in not allowed.
+            <FaExclamationTriangle className="icon-space" /> This project is already <strong>completed</strong>. Check‑in not allowed.
           </div>
         )}
 
@@ -182,7 +183,7 @@ export default function ProjectCheckIn() {
                 <td>{selectedProject.title}</td>
                 <td>{getTeamLeadName(selectedProject.teamID)}</td>
                 <td>
-                  <button onClick={openModal}>View Component List</button>
+                  <button onClick={openModal}><FaList className="icon-space" /> View Component List</button>
                 </td>
               </tr>
             </tbody>
@@ -235,9 +236,9 @@ export default function ProjectCheckIn() {
                 </tbody>
               </table>
               <div className="pc-btn-row">
-                <button onClick={() => setModalOpen(false)}>Cancel</button>
+                <button onClick={() => setModalOpen(false)}><FaTimes className="icon-space" /> Cancel</button>
                 <button disabled={!canSubmit || loading} onClick={handleCheckIn}>
-                  {loading ? "Saving…" : "Check‑In"}
+                  <FaCheck className="icon-space" /> {loading ? "Saving…" : "Check‑In"}
                 </button>
               </div>
             </div>

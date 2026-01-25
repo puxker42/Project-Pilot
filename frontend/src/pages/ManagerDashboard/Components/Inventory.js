@@ -3,8 +3,6 @@ import axios from "axios";
 import "./Inventory.css";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
-import ManagerTopBar from "../TopBarWithLogo";
-import InstructorTopBar from "../../InstructorDashBoard/TopBarWithLogo";
 import NoDataFound from "../../../components/NoDataFound"; // Adjust the path if needed
 
 const BASE_URL = process.env.REACT_APP_API_BASE_URL;
@@ -86,11 +84,11 @@ export default function Inventory() {
     doc.save("Inventory_Report.pdf");
   };
 
-  const TopBar = role === 'Manager' ? ManagerTopBar : InstructorTopBar;
+
 
   return (
     <div>
-      <TopBar title="Component Inventory" />
+
       <div className="inventory-container">
         <h2>Component Inventory</h2>
 

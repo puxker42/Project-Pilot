@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import "./Requirement.css";
-import TopBarWithLogo from "./TopBarWithLogo";
+
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 
@@ -60,7 +60,7 @@ const Requirement = () => {
 
   return (
     <div>
-      <TopBarWithLogo title="Requirement Report" />
+
       <div className="requirement-section">
         <div className="requirement-header">
           <h3>Requirement Table</h3>

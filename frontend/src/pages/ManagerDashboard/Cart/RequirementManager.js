@@ -2,7 +2,7 @@ import React, { useEffect, useState, useRef } from 'react';
 import axios from 'axios';
 import './RequirementManager.css';
 import { useNavigate, useLocation } from 'react-router-dom';
-import TopBarWithLogo from '../TopBarWithLogo';
+
 
 const BASE_URL = process.env.REACT_APP_API_BASE_URL;
 
@@ -140,10 +140,10 @@ const RequirementManager = () => {
       updatedMidOrders = updatedMidOrders.map(item =>
         item.ID === ID
           ? {
-              ...item,
-              toOrder: item.toOrder - updatedQty,
-              ordered: (item.ordered || 0) + updatedQty
-            }
+            ...item,
+            toOrder: item.toOrder - updatedQty,
+            ordered: (item.ordered || 0) + updatedQty
+          }
           : item
       ).filter(item => item.toOrder > 0);
     }
@@ -184,10 +184,10 @@ const RequirementManager = () => {
           setMidOrders(midOrders.map(item =>
             item.ID === original.ID
               ? {
-                  ...item,
-                  toOrder: item.toOrder + itemToRemove.orderedQuantity,
-                  ordered: Math.max((item.ordered || 0) - itemToRemove.orderedQuantity, 0)
-                }
+                ...item,
+                toOrder: item.toOrder + itemToRemove.orderedQuantity,
+                ordered: Math.max((item.ordered || 0) - itemToRemove.orderedQuantity, 0)
+              }
               : item
           ));
         } else {
@@ -324,7 +324,7 @@ const RequirementManager = () => {
 
   return (
     <div className="req-container">
-      <TopBarWithLogo title='Cart Master' />
+
       {/* ✅ Removed top margin / padding by styling inline */}
       <div className='mstt' style={{ paddingTop: '0px', marginTop: '0px' }}>
         {editMode && (
