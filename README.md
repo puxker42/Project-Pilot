@@ -21,3 +21,54 @@ This web application has been successfully tested and deployed at the **Walchand
 It was used to digitize their academic project's record-keeping, manage goods inventory, ensure hassle-free delivery of goods to students, and enforce the return of goods by preventing new project creation for defaulters. 
 
 **The Result:** The system drastically reduced the project goods delivery cycle from **6 months down to just 2 weeks**, including the vendor response and transit periods!
+
+## 🚀 How to Walkthrough
+
+Follow these steps to run the application locally and test the workflow:
+
+### 1. Clone the Repository
+```bash
+git clone https://github.com/puxker42/Project-Pilot.git
+cd Project-Pilot
+```
+
+### 2. Install Node and Dependencies
+Ensure you have [Node.js](https://nodejs.org/) installed on your machine. Install dependencies for both the backend and frontend:
+```bash
+# Install backend dependencies
+cd Backend
+npm install
+
+# Install frontend dependencies
+cd ../frontend
+npm install
+```
+
+### 3. Start the Application
+You'll need to run both the backend server and the frontend client concurrently.
+```bash
+# Start backend (from the Backend directory)
+npm run dev
+
+# Start frontend (from the frontend directory in a new terminal)
+npm start
+```
+*Note: Make sure to set up your `.env` files locally for database and other configurations before starting.*
+
+### 4. Application Walkthrough & User Creation
+Once the application is running (typically on `http://localhost:3000`), you will need test accounts to explore the full functionality.
+
+To fully test the application's workflows, we recommend creating distinct test users for different roles:
+- **Student** (to raise requests for project goods)
+- **Faculty** (to approve or monitor projects)
+- **Manager / Warehouse Clerk** (to maintain stock and fulfill requests)
+- **Admin** (for complete overview and system settings)
+
+🔗 **[Create New Users Here](http://localhost:3000/signup)** (or navigate to the Sign Up page in the app). Create accounts for the roles above to walk through the entire system.
+
+**General Application Workflow:**
+1. **Student** creates a project and requests goods.
+2. **Faculty / Admin** reviews the request.
+3. **Manager** checks warehouse stock, fulfills the delivery, and updates the system.
+4. **Student** receives goods, completes the project, and initiates a return.
+5. **Manager** records the returned goods, closing the lifecycle and enabling the student to raise future requests.
