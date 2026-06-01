@@ -1,0 +1,34 @@
+# Environment
+.env
+**/.env
+
+# Node
+node_modules/
+
+# Build
+build/
+dist/
+
+# Uploads
+Backend/uploads/*
+
+# Logs
+*.log
+
+# Archives
+*.tar
+*.zip
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+
+# Credentials
+All Creadentials.txt
+
+# Generated output
+reproduce_output.txt

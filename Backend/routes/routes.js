@@ -100,6 +100,7 @@ router.get('/verify/get-project/:token', getTokenProject);
 router.post('/verify/success', auth, updateDelivery);
 router.put('/check-in/verify', auth, checkInVerify);
 router.put('/check-in/project', auth, projectReturn);
+
 // --- Vendor Routes ---
 router.post("/create-vendor", auth, createVendor);
 

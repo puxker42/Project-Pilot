@@ -1,0 +1,378 @@
+================================================================================
+PROJECT STRUCTURE - Project Pilot
+================================================================================
+
+Project-Pilot/
+├── .dockerignore
+├── .git/
+├── .gitattributes
+├── All Creadentials.txt
+├── Demo Data.txt
+├── docker-compose.yaml
+├── Dockerfile
+├── GPT Prompts.txt
+├── package-lock.json
+├── package.json
+├── Project Design Notes
+├── projectpilot.tar
+├── README.md
+├── replace-with-table.ps1
+│
+├── Backend/
+│   ├── .env
+│   ├── Dockerfile
+│   ├── generate_test_token.js
+│   ├── index.js
+│   ├── middlewares.js
+│   ├── package-lock.json
+│   ├── package.json
+│   ├── reproduce_output.txt
+│   ├── node_modules/
+│   │
+│   ├── config/
+│   │   └── database.js
+│   │
+│   ├── controllers/
+│   │   ├── Auth.js
+│   │   ├── Cart.js
+│   │   ├── CertificateController.js
+│   │   ├── Components.js
+│   │   ├── Controls.js
+│   │   ├── DeveloperController.js
+│   │   ├── Distribution.js
+│   │   ├── FileHandler.js
+│   │   ├── PendingComponents.js
+│   │   ├── Permissions.js
+│   │   ├── Project.js
+│   │   ├── ProjectReportController.js
+│   │   ├── ResetPassword.js
+│   │   ├── StockReportController.js
+│   │   ├── Team.js
+│   │   └── Vendor.js
+│   │
+│   ├── models/
+│   │   ├── Cart.js
+│   │   ├── Component.js
+│   │   ├── Controls.js
+│   │   ├── GlobalHistory.js
+│   │   ├── MidOrder.js
+│   │   ├── Order.js
+│   │   ├── OTP.js
+│   │   ├── Profile.js
+│   │   ├── Project.js
+│   │   ├── ProjectLog.js
+│   │   ├── ReqTable.js
+│   │   ├── StockLog.js
+│   │   ├── Team.js
+│   │   ├── User.js
+│   │   └── Vendor.js
+│   │
+│   ├── public/
+│   │   ├── logo.png
+│   │   └── fonts/
+│   │       ├── Georgia.ttf
+│   │       ├── Georgia-Bold.ttf
+│   │       ├── Georgia-BoldItalic.ttf
+│   │       └── Georgia-Italic.ttf
+│   │
+│   ├── routes/
+│   │   ├── certificateRoutes.js
+│   │   └── routes.js
+│   │
+│   ├── scripts/
+│   │   └── createVisitor.js
+│   │
+│   ├── utils/
+│   │   ├── createDeveloper.js
+│   │   ├── errorHandler.js
+│   │   ├── mailSender.js
+│   │   ├── SmsSender.js
+│   │   └── verify_nested.js
+│   │
+│   └── uploads/
+│       ├── file-1764822997017-202793989.docx
+│       ├── file-1764841291608-731962610.docx
+│       ├── file-1764937385165-505624453.pdf
+│       ├── file-1765284428756-777480950.docx
+│       ├── file-1765368597963-521271595.pdf
+│       └── file-1765368645317-443292327.pdf
+│
+└── frontend/
+    ├── .env
+    ├── .gitignore
+    ├── Dockerfile
+    ├── netlify.toml
+    ├── package-lock.json
+    ├── package.json
+    ├── README.md
+    ├── testhtml.html
+    ├── node_modules/
+    │
+    ├── public/
+    │   ├── _redirects
+    │   ├── favicon.ico
+    │   ├── index.html
+    │   ├── logo.png
+    │   ├── logo192.png
+    │   ├── logo512.png
+    │   ├── manifest.json
+    │   └── robots.txt
+    │
+    ├── build/
+    │   ├── _redirects
+    │   ├── favicon.ico
+    │   ├── logo.png
+    │   ├── logo192.png
+    │   ├── logo512.png
+    │   ├── manifest.json
+    │   └── robots.txt
+    │
+    └── src/
+        ├── api.js
+        ├── App.css
+        ├── App.js
+        ├── App.test.js
+        ├── index.css
+        ├── index.js
+        ├── logo.svg
+        ├── reportWebVitals.js
+        ├── setupTests.js
+        │
+        ├── components/
+        │   ├── AnimatedEmptyState.js
+        │   ├── ComponentCard.js
+        │   ├── ErrorBoundary.js
+        │   ├── Footer.js
+        │   ├── Header.js
+        │   ├── NoDataFound.css
+        │   ├── NoDataFound.js
+        │   ├── ProjectCard.js
+        │   ├── ReportUploadSlot.css
+        │   ├── ReportUploadSlot.js
+        │   └── css/
+        │       ├── Card.css
+        │       ├── Footer.css
+        │       └── Header.css
+        │
+        ├── images/
+        │   ├── admin-dashboard-demo.png
+        │   ├── allDone.png
+        │   ├── logo.png
+        │   ├── manager-cartcreator.png
+        │   ├── manager-dashboard-demo.png
+        │   ├── manager-distributionslotcreator.png
+        │   ├── manager-navitem-Inventory.png
+        │   ├── manager-navitem-orders.png
+        │   ├── manager-navitem-projects.png
+        │   ├── manager-reportgen-projectreport.png
+        │   ├── manager-reportgen-stock.png
+        │   ├── NoProjects.jpg
+        │   ├── PilotLogo.png
+        │   ├── project.jpg
+        │   ├── student-dashboard-demo.png
+        │   ├── student-myprojects-reports.png
+        │   ├── student-myprojects.png
+        │   ├── student-projectcreator-pg1.png
+        │   ├── student-projectcreator-pg2.png
+        │   ├── student-projectcreator-pg3.png
+        │   ├── student-projectcreator-pg4.png
+        │   ├── student-projectcreator-pg5.png
+        │   ├── student-projectcreator-pg6.png
+        │   └── student-team-creator.png
+        │
+        ├── pages/
+        │   ├── AccessDenied.js
+        │   ├── FailurePage.js
+        │   ├── PageNotFound.js
+        │   ├── PendingComponentsPage.css
+        │   ├── PendingComponentsPage.js
+        │   ├── statusMap.js
+        │   ├── SuccessPage.js
+        │   ├── UnderConstruction.js
+        │   ├── UserDashboard.js
+        │   │
+        │   ├── AdminDashboard/
+        │   │   ├── AdminDashboard.css
+        │   │   ├── AdminDashboard.js
+        │   │   ├── ControlsCard.css
+        │   │   ├── ControlsCard.js
+        │   │   ├── TopBarWithLogo.css
+        │   │   └── TopBarWithLogo.js
+        │   │
+        │   ├── Authentication/
+        │   │   ├── DeveloperLogin.css
+        │   │   ├── DeveloperLogin.js
+        │   │   ├── ForgotPassword.css
+        │   │   ├── ForgotPassword.js
+        │   │   ├── land.css
+        │   │   ├── landing.js
+        │   │   ├── LogFail.js
+        │   │   ├── Login.css
+        │   │   ├── Login.js
+        │   │   ├── loginFailed.css
+        │   │   ├── ResetPassword.css
+        │   │   ├── ResetPassword.js
+        │   │   ├── signfail.css
+        │   │   ├── signFail.js
+        │   │   ├── signsuc.css
+        │   │   ├── signSuc.js
+        │   │   ├── signup.css
+        │   │   ├── SignUp.js
+        │   │   └── try.py
+        │   │
+        │   ├── css/
+        │   │   ├── CreateProject.css
+        │   │   ├── ManControls.css
+        │   │   ├── Notification.css
+        │   │   ├── otpReceiver.css
+        │   │   ├── PageNotFound.css
+        │   │   ├── projects.css
+        │   │   ├── Search.css
+        │   │   ├── UnderConstruction.css
+        │   │   └── UserDashboard.css
+        │   │
+        │   ├── DeveloperDashboard/
+        │   │   ├── DatabaseViewer.css
+        │   │   ├── DatabaseViewer.js
+        │   │   ├── DeveloperDashboard.css
+        │   │   ├── DeveloperDashboard.js
+        │   │   ├── DeveloperUserManagement.css
+        │   │   └── DeveloperUserManagement.js
+        │   │
+        │   ├── InstructorDashBoard/
+        │   │   ├── Card.css
+        │   │   ├── Card.js
+        │   │   ├── ComponentForm.css
+        │   │   ├── ComponentForm.js
+        │   │   ├── GuidedProjects.css
+        │   │   ├── GuidedProjects.js
+        │   │   ├── InstructorDashboard.css
+        │   │   ├── InstructorDashboard.js
+        │   │   ├── ProjectApprovalManager.css
+        │   │   ├── ProjectApprovalManager.js
+        │   │   ├── ProjectApprovalManager.js.backup
+        │   │   ├── TopBarWithLogo.css
+        │   │   └── TopBarWithLogo.js
+        │   │
+        │   ├── ManagerDashboard/
+        │   │   ├── ManagerDashboard.css
+        │   │   ├── ManagerDashboard.js
+        │   │   ├── ManagerLayout.js
+        │   │   ├── MyProjects.js
+        │   │   ├── QuickActions.css
+        │   │   ├── QuickActions.js
+        │   │   ├── Requirement.css
+        │   │   ├── Requirements.js
+        │   │   ├── Topbar.css
+        │   │   ├── Topbar.js
+        │   │   ├── TopBarWithLogo.css
+        │   │   ├── TopBarWithLogo.js
+        │   │   │
+        │   │   ├── Cart/
+        │   │   │   ├── CheckIn.css
+        │   │   │   ├── CheckIn.js
+        │   │   │   ├── CheckInLand.js
+        │   │   │   ├── CreateVendor.css
+        │   │   │   ├── CreateVendor.js
+        │   │   │   ├── Order.css
+        │   │   │   ├── Order.js
+        │   │   │   ├── ProjectCheckIn.css
+        │   │   │   ├── ProjectCheckIn.js
+        │   │   │   ├── RequirementManager.css
+        │   │   │   ├── RequirementManager.js
+        │   │   │   ├── ViewCarts.css
+        │   │   │   └── ViewCarts.js
+        │   │   │
+        │   │   ├── Components/
+        │   │   │   ├── CreateComponent.css
+        │   │   │   ├── CreateComponent.js
+        │   │   │   ├── Inventory.css
+        │   │   │   └── Inventory.js
+        │   │   │
+        │   │   ├── Distribution/
+        │   │   │   ├── AssignSlots.css
+        │   │   │   ├── AssignSlots.js
+        │   │   │   ├── Distribute.css
+        │   │   │   ├── Distribute.js
+        │   │   │   ├── ProjectPopup.css
+        │   │   │   ├── ProjectPopup.js
+        │   │   │   ├── VerifyDelivery.css
+        │   │   │   └── VerifyDelivery.js
+        │   │   │
+        │   │   ├── Projects/
+        │   │   │   ├── ProjectDashboard.css
+        │   │   │   └── ProjectDashboard.js
+        │   │   │
+        │   │   └── Reports/
+        │   │       ├── CertificateGenerator.js
+        │   │       ├── ComponentWiseStockReport.js
+        │   │       ├── DayWiseStockReport.js
+        │   │       ├── GenerateReports.css
+        │   │       └── GenerateReports.js
+        │   │
+        │   ├── UserDashBoard/
+        │   │   ├── ButtonCard.css
+        │   │   ├── ButtonCard.js
+        │   │   ├── Card.css
+        │   │   ├── Card.js
+        │   │   ├── Dashboard.css
+        │   │   ├── Dashboard.js
+        │   │   ├── InstructionCard.css
+        │   │   ├── InstructionCard.js
+        │   │   ├── MyProjects.css
+        │   │   ├── MyProjects.js
+        │   │   ├── MyTeams.css
+        │   │   ├── MyTeams.js
+        │   │   ├── Navbar.css
+        │   │   ├── Navbar.js
+        │   │   ├── Sidebar.css
+        │   │   ├── Sidebar.js
+        │   │   ├── StudentDashboard.css
+        │   │   ├── StudentDashboard.js
+        │   │   ├── Topbar.css
+        │   │   ├── Topbar.js
+        │   │   ├── TopBarWithLogo.css
+        │   │   ├── TopBarWithLogo.js
+        │   │   │
+        │   │   ├── CreateProject/
+        │   │   │   ├── Form.css
+        │   │   │   ├── Form.js
+        │   │   │   ├── ProjectWizard.js
+        │   │   │   │
+        │   │   │   ├── components/
+        │   │   │   │   ├── ComponentRequestForm.js
+        │   │   │   │   ├── ComponentSearchTable.js
+        │   │   │   │   ├── DraftManager.js
+        │   │   │   │   ├── StepFive.js
+        │   │   │   │   ├── StepFour.js
+        │   │   │   │   ├── StepOne.js
+        │   │   │   │   ├── StepSix.js
+        │   │   │   │   ├── StepThree.js
+        │   │   │   │   └── StepTwo.js
+        │   │   │   │
+        │   │   │   ├── hooks/
+        │   │   │   │   └── useDraft.js
+        │   │   │   │
+        │   │   │   └── utils/
+        │   │   │       ├── animations.js
+        │   │   │       ├── draftUtils.js
+        │   │   │       └── idGenerator.js
+        │   │   │
+        │   │   └── CreateTeam/
+        │   │       ├── CreateTeam.css
+        │   │       └── CreateTeam.js
+        │   │
+        │   └── VisitorDashboard/
+        │       ├── VisitorDashboard.css
+        │       └── VisitorDashboard.js
+        │
+        └── routes/
+            ├── PrivateRoutes.js
+            ├── RoleBasedRoute.js
+            ├── routes.js
+            ├── TokenMissing.css
+            └── TokenMissing.js
+
+================================================================================
+END OF PROJECT STRUCTURE
+================================================================================
