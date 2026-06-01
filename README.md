@@ -55,16 +55,29 @@ npm start
 ```
 *Note: Make sure to set up your `.env` files locally for database and other configurations before starting.*
 
-### 4. Application Walkthrough & User Creation
-Once the application is running (typically on `http://localhost:3000`), you will need test accounts to explore the full functionality.
+### 4. Application Walkthrough
 
-To fully test the application's workflows, we recommend creating distinct test users for different roles:
-- **Student** (to raise requests for project goods)
-- **Faculty** (to approve or monitor projects)
-- **Manager / Warehouse Clerk** (to maintain stock and fulfill requests)
-- **Admin** (for complete overview and system settings)
+Once the application is running (typically on `http://localhost:3000`), you have two ways to explore the features:
 
-🔗 **[Create New Users Here](http://localhost:3000/signup)** (or navigate to the Sign Up page in the app). Create accounts for the roles above to walk through the entire system.
+#### Option A: Quick Visitor Access (Recommended)
+If you just want to quickly browse the features without creating multiple accounts, you can use the pre-configured **Visitor** account. To set this up, run the visitor creation script:
+```bash
+# From the Backend directory
+node scripts/createVisitor.js
+```
+Then, log in with the following credentials:
+- **User ID:** `9878`
+- **Password:** `ABC@1234`
+*(This takes you to the Visitor Dashboard where you can explore the application's UI and features).*
+
+#### Option B: Full Workflow Testing
+To fully test the application's end-to-end capabilities, we recommend creating test users for different roles:
+- **Student:** Raises requests for project goods.
+- **Faculty:** Approves and monitors projects.
+- **Manager:** Maintains stock and fulfills requests.
+- **Admin:** Manages system settings.
+
+🔗 **[Create New Users Here](http://localhost:3000/signup)** (or navigate to the Sign Up page). 
 
 **General Application Workflow:**
 1. **Student** creates a project and requests goods.
