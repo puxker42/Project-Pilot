@@ -1,4 +1,4 @@
-# Project Pilot
+# InvenFlow - A Warehouse management System
 
 ## ❓ What Problem Do We Solve?
 Inter-organizational goods delivery, stock maintenance, and the flow of goods often suffer from misplacement and tracking issues. Managing this inventory efficiently is a significant challenge when using traditional paper-based processes.
