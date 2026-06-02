@@ -16,7 +16,7 @@ We provide a digital **M.E.R.N. Stack** web application that acts as a comprehen
 Our main target is small goods delivery and inter-organizational inventory flow control, guaranteeing proper maintenance and transparency across projects.
 
 ## 🧪 Testing and Real-World Impact
-This web application has been successfully tested and deployed at the **Walchand College of Engineering, Sangli**. 
+This web application has been successfully tested at the **Walchand College of Engineering, Sangli**. 
 
 It was used to digitize their academic project's record-keeping, manage goods inventory, ensure hassle-free delivery of goods to students, and enforce the return of goods by preventing new project creation for defaulters. 
 
